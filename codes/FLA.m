@@ -186,7 +186,7 @@ for t = 1:T
     end
     for j=1:n2
         FU=X2new(j,:)>ub;FL=X2new(j,:)<lb;X2new(j,:)=(X2new(j,:).*(~(FU+FL)))+ub.*FU+lb.*FL;
-        v = feval(objfunc,X2new(j,:));
+        v = feval(objfunc,X2new(j,:), data, target);
         if v<FS2(j)
             FS2(j)=v;
             X2(j,:)= X2new(j,:);
