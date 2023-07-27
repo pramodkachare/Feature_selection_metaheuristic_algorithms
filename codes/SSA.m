@@ -19,9 +19,12 @@
 
 function [FoodFitness,FoodPosition,Convergence_curve]=SSA(N,Max_iter,lb,ub,dim,fobj, X, y)
 
-if size(ub,1)==1
+if size(ub,2)==1
     ub=ones(dim,1)*ub;
     lb=ones(dim,1)*lb;
+else
+    ub = ub.';
+    lb = lb.';
 end
 
 Convergence_curve = zeros(1,Max_iter);
@@ -38,8 +41,7 @@ FoodFitness=inf;
 
 for i=1:size(SalpPositions,1)
 %     SalpFitness(1,i)=fobj(SalpPositions(i,:));
-             SalpFitness(1,i) = feval(fobj,SalpPositions(i,:)', X, y);
-
+      SalpFitness(1,i) = feval(fobj,SalpPositions(i,:), X, y);
 end
 
 [sorted_salps_fitness,sorted_indexes]=sort(SalpFitness);
@@ -88,10 +90,12 @@ while l<Max_iter+1
     
     for i=1:size(SalpPositions,1)
         
-        Tp=SalpPositions(i,:)>ub';Tm=SalpPositions(i,:)<lb';SalpPositions(i,:)=(SalpPositions(i,:).*(~(Tp+Tm)))+ub'.*Tp+lb'.*Tm;
+        Tp=SalpPositions(i,:)>ub';
+        Tm=SalpPositions(i,:)<lb';
+        SalpPositions(i,:)=(SalpPositions(i,:).*(~(Tp+Tm)))+ub'.*Tp+lb'.*Tm;
         
 %         SalpFitness(1,i)=fobj(SalpPositions(i,:));
-                     SalpFitness(1,i) = feval(fobj,SalpPositions(i,:)', X, y);
+                     SalpFitness(1,i) = feval(fobj,SalpPositions(i,:), X, y);
 
         
         if SalpFitness(1,i)<FoodFitness
