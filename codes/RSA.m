@@ -1,19 +1,3 @@
-%_______________________________________________________________________________________%
-%  Reptile Search Algroithm (RSA) source codes demo version 1.0                         %
-%                                                                                       %
-%  Developed in MATLAB R2015a (7.13)                                                    %
-%                                                                                       %
-%  Author and programmer: Laith Abualigah                                               %
-%                                                                                       %
-%         e-Mail: Aligah.2020@gmail.com                                                 %
-%       Homepage:                                                                       %
-%         1- https://scholar.google.com/citations?user=39g8fyoAAAAJ&hl=en               %
-%         2- https://www.researchgate.net/profile/Laith_Abualigah                       %
-%_______________________________________________________________________________________%
-%  Main paper:            Reptile Search Algorithm (RSA):                               %
-%                  A novel nature-inspired metaheuristic algorithm                      %                                                                       %
-%_______________________________________________________________________________________%
-
 function [Best_F,Best_P,Conv]=RSA(N,T,LB,UB,Dim,F_obj, data, target)
     Best_P=zeros(1,Dim);           % best positions
     Best_F=inf;                    % best fitness
@@ -42,14 +26,14 @@ function [Best_F,Best_P,Conv]=RSA(N,T,LB,UB,Dim,F_obj, data, target)
         for i=2:size(X,1) 
             for j=1:size(X,2)  
                     R=Best_P(1,j)-X(randi([1 size(X,1)]),j)/((Best_P(1,j))+eps);
-                    P=Alpha+(X(i,j)-mean(X(i,:)))/(Best_P(1,j)*(UB-LB)+eps);
+                    P=Alpha+(X(i,j)-mean(X(i,:)))./(Best_P(1,j).*(UB-LB)+eps);
                     Eta=Best_P(1,j)*P;
                     if (t<T/4)
                         Xnew(i,j)=Best_P(1,j)-Eta*Beta-R*rand;    
                     elseif (t<2*T/4 && t>=T/4)
                         Xnew(i,j)=Best_P(1,j)*X(randi([1 size(X,1)]),j)*ES*rand;
                     elseif (t<3*T/4 && t>=2*T/4)
-                        Xnew(i,j)=Best_P(1,j)*P*rand;
+                        Xnew(i,j)=Best_P(1,j)*P(1,j)*rand;
                     else
                         Xnew(i,j)=Best_P(1,j)-Eta*eps-R*rand;
                     end
