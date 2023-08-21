@@ -8,7 +8,7 @@ clc
 
 %% CONSTANTS
 % Assuming data stored in the Dataset folder.
-datasets = {'3-class_LCOWFB.csv';...
+datasets = {'HeartEW.csv';...
             };
 
 % List of NIAs        
@@ -28,7 +28,7 @@ for ii=1:length(datasets)
     fprintf('Database: %s\n', filename)
     
     % Assuming data has header. Skip first row
-    data = csvread(fullfile('dataset', filename), 1);
+    data = csvread(fullfile('..\dataset', filename), 1);
     target = data(:, end);   % Target
     data = data(:, 1:end-1); % Input features
     
@@ -54,7 +54,8 @@ for ii=1:length(datasets)
 
         for kk=1:runs
             if K_fold > 1   % Select seperate data fold for each run
-                ind = test(cv, kk);   % testing index
+                % Generate data fold index
+                ind = test(cv, mod(kk, K_fold)+K_fold*double(mod(kk, K_fold)==0));   
                 X = data(ind, :); 
                 y = target(ind, :);
             end
