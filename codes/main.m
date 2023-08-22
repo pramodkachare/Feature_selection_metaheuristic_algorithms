@@ -69,8 +69,13 @@ for ii=1:length(datasets)
                   algos{jj}, '(N,T,lb,ub,dim,fitfun, X, y);']);
             
             % Save results after each run
-            save(['Results\\', algos{jj},'_', filename(1:end-3),'mat'], ['Best_F_' algos{jj}],...
-                 ['Best_P_' algos{jj}], ['conv_curve_' algos{jj}], ['CT_' algos{jj}]);
+            if isfolder('Results')
+                mkdir('Results');
+            end
+            save(['Results\\', algos{jj},'_', filename(1:end-3),'mat'], ...
+                 ['Best_F_' algos{jj}],...
+                 ['Best_P_' algos{jj}],... 
+                 ['conv_curve_' algos{jj}], ['CT_' algos{jj}]);
         end
     end  % END of algo loop
 end   % END of dataset loop
