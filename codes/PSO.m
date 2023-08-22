@@ -1,13 +1,20 @@
-%% Particle Swarm Optimization (PSO) for feature selection
+%PSO Particle Swarm Optimization
 % [GBEST, GPOS, cgCurve, CT] = PSO (X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 % 
-% A course on "Optimization Problems and Algorithms: how to understand, 
-% formulation, and solve optimization problems": 
-% https://www.udemy.com/optimisation/?couponCode=MATHWORKSREF
-% 
-% "Introduction to Genetic Algorithms: Theory and Applications" 
-% https://www.udemy.com/geneticalgorithm/?couponCode=MATHWORKSREF
-% 
+%     [GBEST, GPOS] = PSO(X) applies feature selection on M-by-N matrix X
+%     with N examples and assuming last column as the classification target 
+%     and returns the best fitness value GBEST and 1-by-(M-1) logical matrix
+%     of selected features GPOS.
+%
+%     [GBEST, GPOS] = PSO(X, y) applies feature selection on M-by-N feature 
+%     matrix X and 1-by-N target matrix y and returns the best fitness value
+%     GBEST and 1-by-(M-1) logical matrix of selected features GPOS.
+%     
+%     Example:
+%
+%     Documentation for size
+%     Other functions named size
+    
 % Original Author: Dr. Seyedali Mirjalili
 % Revised by : Pramod H. Kachare (Aug 2023)
 
