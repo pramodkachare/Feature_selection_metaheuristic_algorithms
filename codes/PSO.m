@@ -1,62 +1,103 @@
-% Written by Dr. Seyedali Mirjalili
-% To wach videos on this algorithm, enrol to the course with 95% discount using the following links: 
+%% Particle Swarm Optimization (PSO) for feature selection
+% [GBEST, GPOS, cgCurve, CT] = PSO (X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+% 
+% A course on "Optimization Problems and Algorithms: how to understand, 
+% formulation, and solve optimization problems": 
+% https://www.udemy.com/optimisation/?couponCode=MATHWORKSREF
+% 
+% "Introduction to Genetic Algorithms: Theory and Applications" 
+% https://www.udemy.com/geneticalgorithm/?couponCode=MATHWORKSREF
+% 
+% Original Author: Dr. Seyedali Mirjalili
+% Revised by : Pramod H. Kachare (Aug 2023)
 
-% ************************************************************************************************************************************************* 
-%  A course on "Optimization Problems and Algorithms: how to understand, formulation, and solve optimization problems": 
-%  https://www.udemy.com/optimisation/?couponCode=MATHWORKSREF
-% ************************************************************************************************************************************************* 
-%  "Introduction to Genetic Algorithms: Theory and Applications" 
-%  https://www.udemy.com/geneticalgorithm/?couponCode=MATHWORKSREF
-% ************************************************************************************************************************************************* 
+function [GBEST,  GPOS, cgCurve, CT] = PSO (X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+if nargin < 1
+    error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
+end
 
+if nargin < 2  % If only data is given, assume last column as target
+    y = X(:, end);
+    X = X(:, 1:end-1);
+end
 
-function [GBEST,  GPOS, cgCurve ] = PSO (noP,maxIter,lb,ub,nVar,fobj, data, target)
+if nargin < 3  % Default 10 search agents
+    No_P = 10;
+end
 
+if nargin < 4
+    fobj = str2func('split_fitness'); % Apply feature selection
+end
+
+if nargin < 5
+    N_Var = size(X, 2); % Apply feature selection on columns of X
+end
+
+if nargin < 6
+    Max_Iter = 100;     % Run optimization for max 100 iterations
+end
+
+if nargin < 8
+    UB = 1;     % Assume upper limit for each variable is 1
+end
+if nargin < 7
+    LB = 0;     % Assume lower limit for each variable is 0
+end
+
+if nargin < 9
+    verbose = 1; % Print progress after each iteration
+end
+%Start timer
+timer = tic();
 
 % Extra variables for data visualization
 % average_objective = zeros(1, maxIter);
-cgCurve = zeros(1, maxIter);
-FirstP_D1 = zeros(1 , maxIter);
-position_history = zeros(noP , maxIter , nVar );
+cgCurve = zeros(1, Max_Iter);
+FirstP_D1 = zeros(1 , Max_Iter);
+position_history = zeros(No_P , Max_Iter , N_Var );
 
 % Define the PSO's paramters
 wMax = 0.9;
 wMin = 0.2;
 c1 = 2;
 c2 = 2;
-if length(ub)==1
-    ub = repmat(ub, 1, nVar);
-    lb = repmat(lb, 1, nVar);
+if length(UB)==1    % If same limit is applied on all variables
+    UB = repmat(UB, 1, N_Var);
+    LB = repmat(LB, 1, N_Var);
 end
 
-vMax = (ub - lb) .* 0.2;
+vMax = (UB - LB) .* 0.2;
 vMin  = -vMax;
 
 % The PSO algorithm
 
 % Initialize the particles
-for k = 1 : noP
-    Swarm.Particles(k).X = (ub-lb) .* rand(1,nVar) + lb;
-    Swarm.Particles(k).V = zeros(1, nVar);
-    Swarm.Particles(k).PBEST.X = zeros(1,nVar);
+for k = 1 : No_P
+    % Particle position
+    Swarm.Particles(k).X = (UB-LB) .* rand(1,N_Var) + LB;
+    % Particle velocity
+    Swarm.Particles(k).V = zeros(1, N_Var);
+    
+    % Best position of a particle
+    Swarm.Particles(k).PBEST.X = zeros(1,N_Var);
+    % Best fitness of a particle
     Swarm.Particles(k).PBEST.O = inf;
     
-    Swarm.GBEST.X = zeros(1,nVar);
+    % Global best particle position
+    Swarm.GBEST.X = zeros(1,N_Var);
+    % Global best particle fitness
     Swarm.GBEST.O = inf;
 end
 
 
 % Main loop
-for t = 1 : maxIter
-    
+for t = 1 : Max_Iter  
     % Calcualte the objective value
-    for k = 1 : noP
-        
+    for k = 1 : No_P      
         currentX = Swarm.Particles(k).X;
-        position_history(k , t , : ) = currentX;
+        position_history(k , t , : ) = currentX;      
         
-        
-        Swarm.Particles(k).O = fobj(currentX, data, target);
+        Swarm.Particles(k).O = fobj(currentX, X, y);
 %         average_objective(t) =  average_objective(t)  + Swarm.Particles(k).O;
         
         % Update the PBEST
@@ -73,41 +114,42 @@ for t = 1 : maxIter
     end
     
     % Update the X and V vectors
-    w = wMax - t .* ((wMax - wMin) / maxIter);
+    w = wMax - t .* ((wMax - wMin) / Max_Iter);
     
     FirstP_D1(t) = Swarm.Particles(1).X(1);
     
-    for k = 1 : noP
-        Swarm.Particles(k).V = w .* Swarm.Particles(k).V + c1 .* rand(1,nVar) .* (Swarm.Particles(k).PBEST.X - Swarm.Particles(k).X) ...
-            + c2 .* rand(1,nVar) .* (Swarm.GBEST.X - Swarm.Particles(k).X);
+    for k = 1 : No_P
+        Swarm.Particles(k).V = w .* Swarm.Particles(k).V + c1 .* rand(1,N_Var) .* (Swarm.Particles(k).PBEST.X - Swarm.Particles(k).X) ...
+            + c2 .* rand(1,N_Var) .* (Swarm.GBEST.X - Swarm.Particles(k).X);
         
+        % Check velocities are within limits
+        ind = find(Swarm.Particles(k).V > vMax);
+        Swarm.Particles(k).V(ind) = vMax(ind);
         
-        % Check velocities
-        index1 = find(Swarm.Particles(k).V > vMax);
-        index2 = find(Swarm.Particles(k).V < vMin);
-        
-        Swarm.Particles(k).V(index1) = vMax(index1);
-        Swarm.Particles(k).V(index2) = vMin(index2);
+        ind = find(Swarm.Particles(k).V < vMin);      
+        Swarm.Particles(k).V(ind) = vMin(ind);
         
         Swarm.Particles(k).X = Swarm.Particles(k).X + Swarm.Particles(k).V;
         
-        % Check positions
-        index1 = find(Swarm.Particles(k).X > ub);
-        index2 = find(Swarm.Particles(k).X < lb);
-        
-        Swarm.Particles(k).X(index1) = ub(index1);
-        Swarm.Particles(k).X(index2) = lb(index2);
-        
+        % Check positions are within limits
+        ind = find(Swarm.Particles(k).X > UB);
+        Swarm.Particles(k).X(ind) = UB(ind);
+
+        ind = find(Swarm.Particles(k).X < LB);
+        Swarm.Particles(k).X(ind) = LB(ind);
     end
-    
-        
+            
     cgCurve(t) = Swarm.GBEST.O;
-    if mod(t,1)==0  %Print the best universe details after every t iterations
+    if mod(t, verbose)==0  %Print best particle details after every t iters
         fprintf('PSO: Iteration %d    fitness: %4.3f \n', t, Swarm.GBEST.O);
     end
 %     average_objective(t) = average_objective(t) / noP;
     
 end
-GBEST = Swarm.GBEST.O;
-GPOS = Swarm.GBEST.X;
+GBEST = Swarm.GBEST.O; % Global best fitness
+GPOS = Swarm.GBEST.X;  % Global best position
+CT = toc(timer);       % Total computation time in seconds
+
 fprintf('PSO: Final fitness: %4.3f \n', Swarm.GBEST.O);
+
+%% END OF PSO.m
