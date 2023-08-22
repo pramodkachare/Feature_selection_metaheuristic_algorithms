@@ -55,7 +55,9 @@ for ii=1:length(datasets)
         for kk=1:runs
             if K_fold > 1   % Select seperate data fold for each run
                 % Generate data fold index
-                ind = test(cv, mod(kk, K_fold)+K_fold*double(mod(kk, K_fold)==0));   
+                % If #data folds = #runs then each run uses different fold
+                % else data folds are repeated.
+                ind = test(cv, mod(kk, K_fold)+K_fold*double(mod(kk, K_fold)==0)); 
                 X = data(ind, :); 
                 y = target(ind, :);
             end
