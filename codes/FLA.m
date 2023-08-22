@@ -15,10 +15,9 @@
 %               Knowledge-based Systems                                   %
 %                                                                         %
 %_________________________________________________________________________%
-function [BestF, Xss, CNVG, X_hist] = FLA(NoMolecules, T, lb, ub, dim, objfunc, data, target)
-C1=0.5;C2=2;c3=.1;c4=.2;c5=2;
-D=.01;
-X=bsxfun(@plus, lb, bsxfun(@times, (ub-lb), rand(NoMolecules,dim)));%intial postions
+function [BestF, Xss, CNVG] = FLA(NoMolecules, T, lb, ub, dim, objfunc, data, target)
+C1=0.5;C2=2;c3=.1;c4=.2;c5=2;D=.01;
+X=bsxfun(@plus, lb, bsxfun(@times, rand(NoMolecules,dim), (ub-lb)));%intial postions
 for i=1:NoMolecules
     FS(i) = feval(objfunc,X(i,:), data, target);
 end
@@ -46,12 +45,8 @@ vec_flag=[1,-1];
     else
         FSss=FSeo2;
         YSol=Xeo2;
-  end
-    
-X_hist = cell(1, T);
+    end
 for t = 1:T
-    X_hist{t} = Xss;      % History of solutions
-    
     TF(t)=sinh(t/T)^C1;
     X=[X1;X2];
     %             DO
@@ -78,7 +73,7 @@ for t = 1:T
                             X1new(u,tt) = Xeo1(tt);
                         elseif p<.9
                             r3=rand;
-                            X1new(u,tt)=X1(u,tt)+DOF.*((ub(tt)-lb(tt))*r3+lb(tt));
+                            X1new(u,tt)=X1(u,tt)+DOF.*((ub(1,tt)-lb(1,tt))*r3+lb(1,tt));
                         else
                             X1new(u,tt) =X1(u,tt);
                         end
@@ -109,7 +104,7 @@ for t = 1:T
                             X2new(u,tt) = Xeo2(tt);
                         elseif p<.9
                             r3=rand;
-                            X2new(u,tt)=X2(u,tt)+DOF.*((ub(tt)-lb(tt))*r3+lb(tt));
+                            X2new(u,tt)=X2(u,tt)+DOF.*((ub(1,tt)-lb(1,tt))*r3+lb(1,tt));
                         else
                             X2new(u,tt) =X2(u,tt);
                         end
@@ -209,9 +204,11 @@ for t = 1:T
     if FSss<BestF
         BestF=FSss;
         Xss =YSol;
+        
     end
-    disp(['teration ' num2str(t) ':   ' ...
-        'Best Cost Bw = ' num2str(BestF)]);  
+    if mod(t,1)==0  %Print the best universe details after every t iterations
+        fprintf('FLA: Iteration %d    fitness: %4.3f \n', t, BestF);
+    end  
 end
 
 end
