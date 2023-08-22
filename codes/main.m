@@ -1,5 +1,22 @@
-%% Main routine for feature selection using Nature-inspired Algorithms
-% Revised date: 21/08/2023
+%Main routine for feature selection using Nature-inspired Algorithms
+% 
+%     Apply feature selection using set of Nature-Inspired Algorithms (NIA)
+%     on set of datasets and store the results in respective MAT file.
+%
+%     datasets = 1-by-N cell array of dataset names in CSV format. Default
+%     storage if 'Dataset' directory. Any additional path must be included
+%     separately in each filename.
+%     
+%     algos = 1-by-N cell array of NIA names. Available NIAs are:
+%     
+%     
+%     Example:
+%
+%     Documentation for size
+%     Other functions named size
+    
+% Author: Pramod H. Kachare (Aug 2023)
+% Last revised: 21/08/2023
 
 %%
 close all
