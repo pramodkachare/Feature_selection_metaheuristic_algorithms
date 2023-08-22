@@ -8,8 +8,12 @@
 %     separately in each filename.
 %     
 %     algos = 1-by-N cell array of NIA names. Available NIAs are:
-%     
-%     
+%     PSO: Particle Swar Optimization (1995)
+%     GWO: Grey Wolf Optimizer (2011)
+%     SSA: Salp Swarm Algorithm (2016)
+%     RSA: Reptile Search Algorithm (2021)
+%     SO: Snake Optimizer (2022)
+%
 %     Example:
 %
 %     Documentation for size
