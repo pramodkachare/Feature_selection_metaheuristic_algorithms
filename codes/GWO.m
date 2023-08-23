@@ -23,8 +23,7 @@
 % Original Author: Dr. Seyedali Mirjalili
 % Revised by : Pramod H. Kachare (Aug 2023)
 
-function [Alpha_score,Alpha_pos,Convergence_curve]=GWO(data, target, SearchAgents_no,Max_iter,lb,ub,dim,fobj, )
-(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose
+function [Alpha_score,Alpha_pos,Conv_curve, CT]=GWO(X, y, No_P, fobj, N_Var, Max_iter, LB, UB, verbose)
 % initialize alpha, beta, and delta_pos
 Alpha_pos=zeros(1,dim);
 Alpha_score=inf; %change this to -inf for maximization problems
@@ -36,9 +35,9 @@ Delta_pos=zeros(1,dim);
 Delta_score=inf; %change this to -inf for maximization problems
 
 %Initialize the positions of search agents
-Positions=initialization(SearchAgents_no,dim,ub,lb);
+Positions=initialization(No_P,dim,UB,LB);
 
-Convergence_curve=zeros(1,Max_iter);
+Conv_curve=zeros(1,Max_iter);
 
 l=0;% Loop counter
 
@@ -47,12 +46,12 @@ while l<Max_iter
     for i=1:size(Positions,1)  
         
        % Return back the search agents that go beyond the boundaries of the search space
-        Flag4ub=Positions(i,:)>ub;
-        Flag4lb=Positions(i,:)<lb;
-        Positions(i,:)=(Positions(i,:).*(~(Flag4ub+Flag4lb)))+ub.*Flag4ub+lb.*Flag4lb;               
+        Flag4ub=Positions(i,:)>UB;
+        Flag4lb=Positions(i,:)<LB;
+        Positions(i,:)=(Positions(i,:).*(~(Flag4ub+Flag4lb)))+UB.*Flag4ub+LB.*Flag4lb;               
         
         % Calculate objective function for each search agent
-        fitness=fobj(Positions(i,:), data, target);
+        fitness=fobj(Positions(i,:), X, y);
         
         % Update Alpha, Beta, and Delta
         if fitness<Alpha_score 
@@ -110,7 +109,7 @@ while l<Max_iter
         end
     end
     l=l+1;    
-    Convergence_curve(l)=Alpha_score;
+    Conv_curve(l)=Alpha_score;
     if mod(l,1)==0
         fprintf('GWO: Iteration %d    fitness: %4.3f \n', l, Alpha_score);
     end
