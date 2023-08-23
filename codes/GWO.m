@@ -77,10 +77,10 @@ Positions=initialization(No_P,N_Var,UB,LB);
 
 Conv_curve=zeros(1,Max_Iter);
 
-l=0;% Loop counter
+tt=0;% Loop counter
 
 % Main loop
-while l<Max_Iter
+while tt<Max_Iter
     for i=1:size(Positions,1)  
         
        % Return back the search agents that go beyond the boundaries of the search space
@@ -109,7 +109,7 @@ while l<Max_Iter
     end
     
     
-    a=2-l*((2)/Max_Iter); % a decreases linearly fron 2 to 0
+    a=2-tt*((2)/Max_Iter); % a decreases linearly fron 2 to 0
     
     % Update the Position of search agents including omegas
     for i=1:size(Positions,1)
@@ -146,10 +146,10 @@ while l<Max_Iter
             
         end
     end
-    l=l+1;    
-    Conv_curve(l)=Alpha_score;
-    if mod(l,1)==0
-        fprintf('GWO: Iteration %d    fitness: %4.3f \n', l, Alpha_score);
+    tt=tt+1;    
+    Conv_curve(tt)=Alpha_score;
+    if mod(tt, verbose)==0
+        fprintf('GWO: Iteration %d    fitness: %4.3f \n', tt, Alpha_score);
     end
 end
 
