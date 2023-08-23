@@ -24,6 +24,10 @@
 % Revised by : Pramod H. Kachare (Aug 2023)
 
 function [Alpha_score,Alpha_pos,Conv_curve, CT]=GWO(X, y, No_P, fobj, N_Var, Max_iter, LB, UB, verbose)
+
+%Start timer
+timer = tic();
+
 % initialize alpha, beta, and delta_pos
 Alpha_pos=zeros(1,dim);
 Alpha_score=inf; %change this to -inf for maximization problems
@@ -114,6 +118,9 @@ while l<Max_iter
         fprintf('GWO: Iteration %d    fitness: %4.3f \n', l, Alpha_score);
     end
 end
+
+CT = toc(timer);       % Total computation time in seconds
+
 fprintf('GWO: Final fitness: %4.3f \n', Alpha_score);
 
 
