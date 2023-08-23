@@ -15,10 +15,7 @@
 %     SO: Snake Optimizer (2022)
 %
 %     Example:
-%
-%     Documentation for size
-%     Other functions named size
-    
+%  
 % Author: Pramod H. Kachare (Aug 2023)
 % Last revised: 21/08/2023
 
