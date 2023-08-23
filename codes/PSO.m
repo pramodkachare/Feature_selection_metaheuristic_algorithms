@@ -96,11 +96,11 @@ end
 
 
 % Main loop
-for t = 1 : Max_Iter  
+for tt = 1 : Max_Iter  
     % Calcualte the objective value
     for k = 1 : No_P      
         currentX = Swarm.Particles(k).X;
-        position_history(k , t , : ) = currentX;      
+        position_history(k , tt , : ) = currentX;      
         
         Swarm.Particles(k).O = fobj(currentX, X, y);
 %         average_objective(t) =  average_objective(t)  + Swarm.Particles(k).O;
@@ -119,9 +119,9 @@ for t = 1 : Max_Iter
     end
     
     % Update the X and V vectors
-    w = wMax - t .* ((wMax - wMin) / Max_Iter);
+    w = wMax - tt .* ((wMax - wMin) / Max_Iter);
     
-    FirstP_D1(t) = Swarm.Particles(1).X(1);
+    FirstP_D1(tt) = Swarm.Particles(1).X(1);
     
     for k = 1 : No_P
         Swarm.Particles(k).V = w .* Swarm.Particles(k).V + c1 .* rand(1,N_Var) .* (Swarm.Particles(k).PBEST.X - Swarm.Particles(k).X) ...
@@ -144,9 +144,9 @@ for t = 1 : Max_Iter
         Swarm.Particles(k).X(ind) = LB(ind);
     end
             
-    cgCurve(t) = Swarm.GBEST.O;
-    if mod(t, verbose)==0  %Print best particle details after every t iters
-        fprintf('PSO: Iteration %d    fitness: %4.3f \n', t, Swarm.GBEST.O);
+    cgCurve(tt) = Swarm.GBEST.O;
+    if mod(tt, verbose)==0  %Print best particle details after every t iters
+        fprintf('PSO: Iteration %d    fitness: %4.3f \n', tt, Swarm.GBEST.O);
     end
 %     average_objective(t) = average_objective(t) / noP;
     
