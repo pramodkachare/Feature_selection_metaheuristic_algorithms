@@ -23,30 +23,64 @@
 % Original Author: Dr. Seyedali Mirjalili
 % Revised by : Pramod H. Kachare (Aug 2023)
 
-function [Alpha_score,Alpha_pos,Conv_curve, CT]=GWO(X, y, No_P, fobj, N_Var, Max_iter, LB, UB, verbose)
+function [Alpha_score,Alpha_pos,Conv_curve, CT]=GWO(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+if nargin < 1
+    error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
+end
 
+if nargin < 2  % If only data is given, assume last column as target
+    y = X(:, end);
+    X = X(:, 1:end-1);
+end
+
+if nargin < 3  % Default 10 search agents
+    No_P = 10;
+end
+
+if nargin < 4
+    fobj = str2func('split_fitness'); % Apply feature selection
+end
+
+if nargin < 5
+    N_Var = size(X, 2); % Apply feature selection on columns of X
+end
+
+if nargin < 6
+    Max_Iter = 100;     % Run optimization for max 100 iterations
+end
+
+if nargin < 8
+    UB = 1;     % Assume upper limit for each variable is 1
+end
+if nargin < 7
+    LB = 0;     % Assume lower limit for each variable is 0
+end
+
+if nargin < 9
+    verbose = 1; % Print progress after each iteration
+end
 %Start timer
 timer = tic();
 
 % initialize alpha, beta, and delta_pos
-Alpha_pos=zeros(1,dim);
+Alpha_pos=zeros(1, N_Var);
 Alpha_score=inf; %change this to -inf for maximization problems
 
-Beta_pos=zeros(1,dim);
+Beta_pos=zeros(1,N_Var);
 Beta_score=inf; %change this to -inf for maximization problems
 
-Delta_pos=zeros(1,dim);
+Delta_pos=zeros(1,N_Var);
 Delta_score=inf; %change this to -inf for maximization problems
 
 %Initialize the positions of search agents
-Positions=initialization(No_P,dim,UB,LB);
+Positions=initialization(No_P,N_Var,UB,LB);
 
-Conv_curve=zeros(1,Max_iter);
+Conv_curve=zeros(1,Max_Iter);
 
 l=0;% Loop counter
 
 % Main loop
-while l<Max_iter
+while l<Max_Iter
     for i=1:size(Positions,1)  
         
        % Return back the search agents that go beyond the boundaries of the search space
@@ -75,7 +109,7 @@ while l<Max_iter
     end
     
     
-    a=2-l*((2)/Max_iter); % a decreases linearly fron 2 to 0
+    a=2-l*((2)/Max_Iter); % a decreases linearly fron 2 to 0
     
     % Update the Position of search agents including omegas
     for i=1:size(Positions,1)
@@ -125,19 +159,19 @@ fprintf('GWO: Final fitness: %4.3f \n', Alpha_score);
 
 
 % This function initialize the first population of search agents
-function Positions=initialization(SearchAgents_no,dim,ub,lb)
+function Positions=initialization(SearchAgents_no,N_Var,ub,lb)
 
 Boundary_no= size(ub,2); % numnber of boundaries
 
 % If the boundaries of all variables are equal and user enter a signle
 % number for both ub and lb
 if Boundary_no==1
-    Positions=rand(SearchAgents_no,dim).*(ub-lb)+lb;
+    Positions=rand(SearchAgents_no,N_Var).*(ub-lb)+lb;
 end
 
 % If each variable has a different lb and ub
 if Boundary_no>1
-    for i=1:dim
+    for i=1:N_Var
         ub_i=ub(i);
         lb_i=lb(i);
         Positions(:,i)=rand(SearchAgents_no,1).*(ub_i-lb_i)+lb_i;
