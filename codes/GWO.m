@@ -23,7 +23,7 @@
 % Original Author: Dr. Seyedali Mirjalili
 % Revised by : Pramod H. Kachare (Aug 2023)
 
-function [Alpha_score,Alpha_pos,Conv_curve, CT]=GWO(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+function [Alpha_score,Alpha_pos,Conv_curve, CT]=GWO(X, y, N_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 if nargin < 1
     error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
 end
@@ -34,7 +34,7 @@ if nargin < 2  % If only data is given, assume last column as target
 end
 
 if nargin < 3  % Default 10 search agents
-    No_P = 10;
+    N_P = 10;
 end
 
 if nargin < 4
@@ -62,6 +62,20 @@ end
 %Start timer
 timer = tic();
 
+%Initialize the positions of search agents
+if length(UB)==1    % If same limit is applied on all variables
+    UB = repmat(UB, 1, N_Var);
+    LB = repmat(LB, 1, N_Var);
+end
+
+% If each variable has a different lb and ub
+Positions = zeros(N_P, N_Var);
+for i=1:N_P
+    Positions(i, :)= (UB-LB) .* rand(1,N_Var) + LB;
+end
+
+Conv_curve=zeros(1,Max_Iter);
+
 % initialize alpha, beta, and delta_pos
 Alpha_pos=zeros(1, N_Var);
 Alpha_score=inf; %change this to -inf for maximization problems
@@ -71,11 +85,6 @@ Beta_score=inf; %change this to -inf for maximization problems
 
 Delta_pos=zeros(1,N_Var);
 Delta_score=inf; %change this to -inf for maximization problems
-
-%Initialize the positions of search agents
-Positions=initialization(No_P,N_Var,UB,LB);
-
-Conv_curve=zeros(1,Max_Iter);
 
 tt=0;% Loop counter
 
@@ -146,6 +155,7 @@ while tt<Max_Iter
             
         end
     end
+    
     tt=tt+1;    
     Conv_curve(tt)=Alpha_score;
     if mod(tt, verbose)==0
@@ -157,24 +167,4 @@ CT = toc(timer);       % Total computation time in seconds
 
 fprintf('GWO: Final fitness: %4.3f \n', Alpha_score);
 
-
-% This function initialize the first population of search agents
-function Positions=initialization(SearchAgents_no,N_Var,ub,lb)
-
-Boundary_no= size(ub,2); % numnber of boundaries
-
-% If the boundaries of all variables are equal and user enter a signle
-% number for both ub and lb
-if Boundary_no==1
-    Positions=rand(SearchAgents_no,N_Var).*(ub-lb)+lb;
-end
-
-% If each variable has a different lb and ub
-if Boundary_no>1
-    for i=1:N_Var
-        ub_i=ub(i);
-        lb_i=lb(i);
-        Positions(:,i)=rand(SearchAgents_no,1).*(ub_i-lb_i)+lb_i;
-    end
-end
-
+%% END OF GWO.m
