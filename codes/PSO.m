@@ -12,9 +12,7 @@
 %     
 %     Example:
 %
-%     Documentation for size
-%     Other functions named size
-    
+%
 % Original Author: Dr. Seyedali Mirjalili
 % Revised by : Pramod H. Kachare (Aug 2023)
 
