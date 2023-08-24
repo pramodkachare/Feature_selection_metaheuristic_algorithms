@@ -1,8 +1,20 @@
-function [Best_F,Best_P,Conv]=RSA(N,T,LB,UB,Dim,F_obj, data, target)
-    Best_P=zeros(1,Dim);           % best positions
+function [Best_F,Best_P,Conv]=RSA(N,T,LB,UB,N_Var,F_obj, data, target)
+    Best_P=zeros(1,N_Var);           % best positions
     Best_F=inf;                    % best fitness
-    X=initialization(N,Dim,UB,LB); % Initialize the positions of solution
-    Xnew=zeros(N,Dim);
+    
+    %Initialize the positions of search agents
+    if length(UB)==1    % If same limit is applied on all variables
+        UB = repmat(UB, 1, N_Var);
+        LB = repmat(LB, 1, N_Var);
+    end
+
+    % If each variable has a different lb and ub
+    X = zeros(N, N_Var);
+    for i=1:N
+        X(i, :)= (UB-LB) .* rand(1,N_Var) + LB;
+    end
+   
+    Xnew=zeros(N, N_Var);
     Conv=zeros(1,T);               % Convergance array
 
 
@@ -26,14 +38,14 @@ function [Best_F,Best_P,Conv]=RSA(N,T,LB,UB,Dim,F_obj, data, target)
         for i=2:size(X,1) 
             for j=1:size(X,2)  
                     R=Best_P(1,j)-X(randi([1 size(X,1)]),j)/((Best_P(1,j))+eps);
-                    P=Alpha+(X(i,j)-mean(X(i,:)))./(Best_P(1,j).*(UB-LB)+eps);
+                    P=Alpha+(X(i,j)-mean(X(i,:)))./(Best_P(1,j).*(UB(1, j)-LB(1, j))+eps);
                     Eta=Best_P(1,j)*P;
                     if (t<T/4)
                         Xnew(i,j)=Best_P(1,j)-Eta*Beta-R*rand;    
                     elseif (t<2*T/4 && t>=T/4)
                         Xnew(i,j)=Best_P(1,j)*X(randi([1 size(X,1)]),j)*ES*rand;
                     elseif (t<3*T/4 && t>=2*T/4)
-                        Xnew(i,j)=Best_P(1,j)*P(1,j)*rand;
+                        Xnew(i,j)=Best_P(1,j)*P*rand;
                     else
                         Xnew(i,j)=Best_P(1,j)-Eta*eps-R*rand;
                     end
