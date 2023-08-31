@@ -1,21 +1,28 @@
-%_________________________________________________________________________________
-%  Salp Swarm Algorithm (SSA) source codes version 1.0
+%SSA Salp Swarm Algorithm
+% [GBEST, GPOS, cgCurve, CT] = PSO (X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+% 
+%   Main paper: Mirjalili, S., Gandomi, A. H., Mirjalili, S. Z., Saremi, S.,
+%               Faris, H., Mirjalili, S. M. (2017). 
+%               Salp Swarm Algorithm: A bio-inspired optimizer for 
+%               engineering design problems
+%               Advances in Engineering Software, 114, 163-191.
+%               DOI: 10.1016/j.advengsoft.2017.07.002
+% 
+%     [GBEST, GPOS] = PSO(X) applies feature selection on M-by-N matrix X
+%     with N examples and assuming last column as the classification target 
+%     and returns the best fitness value GBEST and 1-by-(M-1) logical matrix
+%     of selected features GPOS.
 %
-%  Developed in MATLAB R2016a
+%     [GBEST, GPOS] = PSO(X, y) applies feature selection on M-by-N feature 
+%     matrix X and 1-by-N target matrix y and returns the best fitness value
+%     GBEST and 1-by-(M-1) logical matrix of selected features GPOS.
+%     
+%     Example:
 %
-%  Author and programmer: Seyedali Mirjalili
 %
-%         e-Mail: ali.mirjalili@gmail.com
-%                 seyedali.mirjalili@griffithuni.edu.au
-%
-%       Homepage: http://www.alimirjalili.com
-%
-%   Main paper:
-%   S. Mirjalili, A.H. Gandomi, S.Z. Mirjalili, S. Saremi, H. Faris, S.M. Mirjalili,
-%   Salp Swarm Algorithm: A bio-inspired optimizer for engineering design problems
-%   Advances in Engineering Software
-%   DOI: http://dx.doi.org/10.1016/j.advengsoft.2017.07.002
-%____________________________________________________________________________________
+% Original Author: Dr. Seyedali Mirjalili
+% Revised by : Pramod H. Kachare (Aug 2023)
+
 
 function [FoodFitness,FoodPosition,Convergence_curve]=SSA(N,Max_iter,lb,ub,dim,fobj, X, y)
 
