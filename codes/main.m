@@ -30,7 +30,7 @@ T = 100;        % Max. iterations per run
 N = 20;         % No. of search agents
 lambda = 0.99;  % Fitness contant (multiplier for loss value)   
 K_fold = 2;     % No. of data folds (<=1 to use complete data)
-is_bound = 0;   % 1: Calculate LB & UB based on data or 0: Use 0 & 1
+is_bound = false;   % 1: Calculate LB & UB based on data or 0: Use 0 & 1
 
 %% Datasets and NIAs
 DATA_PATH = '..\dataset'; % Path to the dataset folder
@@ -64,12 +64,9 @@ for ii=1:length(datasets)
 
 %% Initialization
     dim=size(data, 2);   % #features
-    if is_bound  % 1: Calculate LB & UB based on data or 0: Use 0 & 1
-        LB = min(data, [], 1);  % Lower limits  
-        UB = max(data, [], 1);  % Upper limits
-    else        % 0: Use default limits as 0 & 1
-        LB = 0;     UB = 1; % Upper and Lower limits
-    end
+    % 1: Calculate LB & UB based on data or 0: Use 0 & 1
+    LB = double(is_bound) * min(data, [], 1);  % Lower limits  
+    UB = 1 + double(is_bound) * max(data, [], 1);  % Upper limits
     fitfun=str2func('split_fitness');
        
     for jj =1:length(algos)
