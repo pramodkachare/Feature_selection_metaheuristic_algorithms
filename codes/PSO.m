@@ -124,7 +124,8 @@ for tt = 1 : Max_Iter
     FirstP_D1(tt) = Swarm.Particles(1).X(1);
     
     for k = 1 : No_P
-        Swarm.Particles(k).V = w .* Swarm.Particles(k).V + c1 .* rand(1,N_Var) .* (Swarm.Particles(k).PBEST.X - Swarm.Particles(k).X) ...
+        Swarm.Particles(k).V = w .* Swarm.Particles(k).V ...
+            + c1 .* rand(1,N_Var) .* (Swarm.Particles(k).PBEST.X - Swarm.Particles(k).X) ...
             + c2 .* rand(1,N_Var) .* (Swarm.GBEST.X - Swarm.Particles(k).X);
         
         % Check velocities are within limits
