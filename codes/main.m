@@ -26,11 +26,12 @@ clc
 
 %% CONSTANTS
 runs = 10;      % No. of independent runs
-T = 100;        % Max. iterations per run
-N = 20;         % No. of search agents
+Max_Iter = 100; % Max. iterations per run
+No_P = 20;      % No. of search agents
 lambda = 0.99;  % Fitness contant (multiplier for loss value)   
 K_fold = 2;     % No. of data folds (<=1 to use complete data)
 is_bound = false;   % 1: Calculate LB & UB based on data or 0: Use 0 & 1
+verbose = 1;    % Output print level (print best fitness after fixed iters)
 
 %% Datasets and NIAs
 DATA_PATH = '..\dataset'; % Path to the dataset folder
@@ -91,8 +92,8 @@ for ii=1:length(datasets)
                    'Best_P_', algos{jj}, '(kk, :),'...
                    'conv_curve_', algos{jj}, '(kk, :),'...
                    'CT_', algos{jj}, '(kk, 1)]='...
-                  algos{jj}, '(N, T, LB, UB, N_Var, fitfun, X, y);']);
-            
+                  algos{jj}, '(X, y, No_P, fitfun, N_Var, Max_Iter, LB, UB, verbose);']);
+
             % Save results after each run
             if isfolder('Results')
                 mkdir('Results');
