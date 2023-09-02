@@ -29,7 +29,8 @@ runs = 10;      % No. of independent runs
 T = 100;        % Max. iterations per run
 N = 20;         % No. of search agents
 lambda = 0.99;  % Fitness contant (multiplier for loss value)   
-K_fold = 2; % No. of data folds (<=1 to use complete data)
+K_fold = 2;     % No. of data folds (<=1 to use complete data)
+is_bound = 0;   % 1: Calculate LB & UB based on data or 0: Use 0 & 1
 
 %% Datasets and NIAs
 DATA_PATH = '..\dataset'; % Path to the dataset folder
@@ -63,8 +64,12 @@ for ii=1:length(datasets)
 
 %% Initialization
     dim=size(data, 2);   % #features
-    lb = 0; % min(data, [], 1);    
-    ub = 1; % max(data, [], 1);  % Upper and Lower limits
+    if is_bound  % 1: Calculate LB & UB based on data or 0: Use 0 & 1
+        LB = min(data, [], 1);  % Lower limits  
+        UB = max(data, [], 1);  % Upper limits
+    else        % 0: Use default limits as 0 & 1
+        LB = 0;     UB = 1; % Upper and Lower limits
+    end
     fitfun=str2func('split_fitness');
        
     for jj =1:length(algos)
@@ -89,7 +94,7 @@ for ii=1:length(datasets)
                    'Best_P_', algos{jj}, '(kk, :),'...
                    'conv_curve_', algos{jj}, '(kk, :),'...
                    'CT_', algos{jj}, '(kk, 1)]='...
-                  algos{jj}, '(N,T,lb,ub,dim,fitfun, X, y);']);
+                  algos{jj}, '(N,T,LB,UB,dim,fitfun, X, y);']);
             
             % Save results after each run
             if isfolder('Results')
@@ -100,7 +105,7 @@ for ii=1:length(datasets)
                  ['Best_P_' algos{jj}],... 
                  ['conv_curve_' algos{jj}], ...
                  ['CT_' algos{jj}], ...
-                 'lb', 'ub');
+                 'LB', 'UB');
         end
     end  % END of algo loop
 end   % END of dataset loop
