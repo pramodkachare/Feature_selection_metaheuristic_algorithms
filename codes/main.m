@@ -63,7 +63,7 @@ for ii=1:length(datasets)
     end
 
 %% Initialization
-    dim=size(data, 2);   % #features
+    N_Var = size(data, 2);   % #features
     % 1: Calculate LB & UB based on data or 0: Use 0 & 1
     LB = double(is_bound) * min(data, [], 1);  % Lower limits  
     UB = 1 + double(is_bound) * max(data, [], 1);  % Upper limits
@@ -91,7 +91,7 @@ for ii=1:length(datasets)
                    'Best_P_', algos{jj}, '(kk, :),'...
                    'conv_curve_', algos{jj}, '(kk, :),'...
                    'CT_', algos{jj}, '(kk, 1)]='...
-                  algos{jj}, '(N,T,LB,UB,dim,fitfun, X, y);']);
+                  algos{jj}, '(N, T, LB, UB, N_Var, fitfun, X, y);']);
             
             % Save results after each run
             if isfolder('Results')
@@ -102,7 +102,7 @@ for ii=1:length(datasets)
                  ['Best_P_' algos{jj}],... 
                  ['conv_curve_' algos{jj}], ...
                  ['CT_' algos{jj}], ...
-                 'LB', 'UB');
+                 'LB', 'UB', 'N_Var');
         end
     end  % END of algo loop
 end   % END of dataset loop
