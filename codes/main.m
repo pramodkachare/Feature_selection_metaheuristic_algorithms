@@ -25,20 +25,23 @@ clear
 clc
 
 %% CONSTANTS
-% Assuming data stored in the Dataset folder.
+runs = 10;      % No. of independent runs
+T = 100;        % Max. iterations per run
+N = 20;         % No. of search agents
+lambda = 0.99;  % Fitness contant (multiplier for loss value)   
+K_fold = 2; % No. of data folds (<=1 to use complete data)
+
+%% Datasets and NIAs
+DATA_PATH = '..\dataset'; % Path to the dataset folder
+
+% List of datasets to use
 datasets = {'HeartEW.csv';...
             };
 
-% List of NIAs        
+% List of NIAs to use        
 algos ={'PSO';
         'RSA_SO';
         };
-
-runs = 10;  % No. of independent runs
-T = 100;    % Max. iterations per run
-N = 20;     % No. of search agents
-
-K_fold = 2; % No. of data folds (<=1 to use complete data)
 
 %% Load data
 for ii=1:length(datasets) 
@@ -46,7 +49,7 @@ for ii=1:length(datasets)
     fprintf('Database: %s\n', filename)
     
     % Assuming data has header. Skip first row
-    data = csvread(fullfile('..\dataset', filename), 1);
+    data = csvread(fullfile(DATA_PATH, filename), 1);
     target = data(:, end);   % Target
     data = data(:, 1:end-1); % Input features
     
