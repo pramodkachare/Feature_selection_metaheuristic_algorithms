@@ -79,18 +79,16 @@ end
 conv_curve = zeros(1,Max_Iter);
 
 %calculate the fitness of initial salps
+salp_fit = inf*ones(1, N_P);
 for i=1:size(salp_pos,1)
     salp_fit(1,i) = feval(fobj,salp_pos(i,:)', X, y);
 end
 
 [sorted_salps_fitness,sorted_indexes]=sort(salp_fit);
+sorted_salps = salp_pos(sorted_indexes,:);
 
-for newindex=1:N_P
-    Sorted_salps(newindex,:)=salp_pos(sorted_indexes(newindex),:);
-end
-
-food_pos=Sorted_salps(1,:);
-food_fit=sorted_salps_fitness(1);
+food_pos = sorted_salps(1,:);
+food_fit = sorted_salps_fitness(1);
 
 fprintf('SSA: Iteration %d    fitness: %4.3f \n', 1, food_fit);
 conv_curve(1)=food_fit;
@@ -145,7 +143,9 @@ while tt <= Max_Iter
         end
     end
     
-    fprintf('SSA: Iteration %d    fitness: %4.3f \n', tt, food_fit);
+    if mod(tt, verbose) == 0
+        fprintf('SSA: Iteration %d    fitness: %4.3f \n', tt, food_fit);
+    end
     conv_curve(tt)=food_fit;
     tt = tt + 1;
     
