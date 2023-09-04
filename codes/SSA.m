@@ -80,8 +80,8 @@ conv_curve = zeros(1,Max_Iter);
 
 %calculate the fitness of initial salps
 salp_fit = inf*ones(1, N_P);
-for i=1:size(salp_pos,1)
-    salp_fit(1,i) = feval(fobj,salp_pos(i,:)', X, y);
+for ii=1:N_P
+    salp_fit(1,ii) = feval(fobj,salp_pos(ii,:)', X, y);
 end
 
 [sorted_salps_fitness,sorted_indexes]=sort(salp_fit);
@@ -96,50 +96,41 @@ conv_curve(1)=food_fit;
 %Main loop
 tt=2; % start from the second iteration since the first iteration was dedicated to calculating the fitness of salps
 while tt <= Max_Iter
-    
     c1 = 2*exp(-(4*tt/Max_Iter)^2); % Eq. (3.2) in the paper
-    
-    for i=1:size(salp_pos,1)
-        
+    for ii = 1:N_P
         salp_pos= salp_pos';
-        
-        if i<=N_P/2
-            for j=1:1:N_Var
+        if ii <= N_P/2
+            for jj=1:1:N_Var
                 c2=rand();
                 c3=rand();
                 %%%%%%%%%%%%% % Eq. (3.1) in the paper %%%%%%%%%%%%%%
                 if c3<0.5 
-                    salp_pos(j,i)=food_pos(j)+c1*((UB(j)-LB(j))*c2+LB(j));
+                    salp_pos(jj,ii)=food_pos(jj)+c1*((UB(jj)-LB(jj))*c2+LB(jj));
                 else
-                    salp_pos(j,i)=food_pos(j)-c1*((UB(j)-LB(j))*c2+LB(j));
+                    salp_pos(jj,ii)=food_pos(jj)-c1*((UB(jj)-LB(jj))*c2+LB(jj));
                 end
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             end
             
-        elseif i>N_P/2 && i<N_P+1
-            point1=salp_pos(:,i-1);
-            point2=salp_pos(:,i);
+        elseif ii>N_P/2 && ii<N_P+1
+            point1=salp_pos(:,ii-1);
+            point2=salp_pos(:,ii);
             
-            salp_pos(:,i)=(point2+point1)/2; % % Eq. (3.4) in the paper
+            salp_pos(:,ii)=(point2+point1)/2; % % Eq. (3.4) in the paper
         end
-        
         salp_pos= salp_pos';
     end
     
-    for i=1:size(salp_pos,1)
+    for ii=1:N_P
+        Tp=salp_pos(ii,:)>UB;
+        Tm=salp_pos(ii,:)<LB;
+        salp_pos(ii,:)= salp_pos(ii,:).*~(Tp+Tm) + UB.*Tp + LB.*Tm;
         
-        Tp=salp_pos(i,:)>UB;
-        Tm=salp_pos(i,:)<LB;
-        salp_pos(i,:)= salp_pos(i,:).*~(Tp+Tm) + UB.*Tp + LB.*Tm;
+        salp_fit(1,ii) = feval(fobj,salp_pos(ii,:)', X, y);
         
-%         SalpFitness(1,i)=fobj(SalpPositions(i,:));
-                     salp_fit(1,i) = feval(fobj,salp_pos(i,:)', X, y);
-
-        
-        if salp_fit(1,i)<food_fit
-            food_pos=salp_pos(i,:);
-            food_fit=salp_fit(1,i);
-            
+        if salp_fit(1,ii)<food_fit
+            food_pos=salp_pos(ii,:);
+            food_fit=salp_fit(1,ii);
         end
     end
     
@@ -148,13 +139,10 @@ while tt <= Max_Iter
     end
     conv_curve(tt)=food_fit;
     tt = tt + 1;
-    
-    % PUT THIS CODE INSIDE LOOP OF ITERATIONS
-    % Normalize particle position values
-
-    % Population diversity as a whole
 end
 
 CT = toc(timer);       % Total computation time in seconds
 
 fprintf('SSA: Final fitness: %4.3f \n', food_fit);
+
+%% END OF SSA.m
