@@ -96,10 +96,10 @@ fprintf('SSA: Iteration %d    fitness: %4.3f \n', 1, food_fit);
 conv_curve(1)=food_fit;
 
 %Main loop
-l=2; % start from the second iteration since the first iteration was dedicated to calculating the fitness of salps
-while l<Max_Iter+1
+tt=2; % start from the second iteration since the first iteration was dedicated to calculating the fitness of salps
+while tt <= Max_Iter
     
-    c1 = 2*exp(-(4*l/Max_Iter)^2); % Eq. (3.2) in the paper
+    c1 = 2*exp(-(4*tt/Max_Iter)^2); % Eq. (3.2) in the paper
     
     for i=1:size(SalpPositions,1)
         
@@ -145,9 +145,9 @@ while l<Max_Iter+1
         end
     end
     
-    fprintf('SSA: Iteration %d    fitness: %4.3f \n', l, food_fit);
-    conv_curve(l)=food_fit;
-    l = l + 1;
+    fprintf('SSA: Iteration %d    fitness: %4.3f \n', tt, food_fit);
+    conv_curve(tt)=food_fit;
+    tt = tt + 1;
     
     % PUT THIS CODE INSIDE LOOP OF ITERATIONS
     % Normalize particle position values
