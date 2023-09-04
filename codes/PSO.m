@@ -146,7 +146,7 @@ for tt = 1 : Max_Iter
     end
             
     cgCurve(tt) = Swarm.GBEST.O;
-    if mod(tt, verbose)==0  %Print best particle details after every t iters
+    if mod(tt, verbose) == 0  %Print best particle details at fixed iters
         fprintf('PSO: Iteration %d    fitness: %4.3f \n', tt, Swarm.GBEST.O);
     end
 %     average_objective(t) = average_objective(t) / noP;
