@@ -24,7 +24,7 @@
 % Revised by : Pramod H. Kachare (Aug 2023)
 
 
-function [FoodFitness,FoodPosition,Convergence_curve]=SSA(N,Max_iter,lb,ub,dim,fobj, X, y)
+function [food_fit, food_pos, conv_curve, CT]=SSA(X, y, N_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 if nargin < 1
     error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
 end
@@ -63,18 +63,18 @@ end
 %Start timer
 timer = tic();
 
-if size(ub,2)==1
-    ub=ones(1, dim)*ub;
-    lb=ones(1, dim)*lb;
+if size(UB,2)==1
+    UB=ones(1, N_Var)*UB;
+    LB=ones(1, N_Var)*LB;
 end
 
-Convergence_curve = zeros(1,Max_iter);
+conv_curve = zeros(1,Max_Iter);
 
 %Initialize the positions of salps
-SalpPositions=initializations(N,dim,ub,lb);
+SalpPositions=initializations(N_P,N_Var,UB,LB);
 
-FoodPosition=zeros(1,dim);
-FoodFitness=inf;
+food_pos=zeros(1,N_Var);
+food_fit=inf;
 
 %calculate the fitness of initial salps
 for i=1:size(SalpPositions,1)
@@ -84,40 +84,40 @@ end
 
 [sorted_salps_fitness,sorted_indexes]=sort(SalpFitness);
 
-for newindex=1:N
+for newindex=1:N_P
     Sorted_salps(newindex,:)=SalpPositions(sorted_indexes(newindex),:);
 end
 
-FoodPosition=Sorted_salps(1,:);
-FoodFitness=sorted_salps_fitness(1);
+food_pos=Sorted_salps(1,:);
+food_fit=sorted_salps_fitness(1);
 
-fprintf('SSA: Iteration %d    fitness: %4.3f \n', 1, FoodFitness);
-Convergence_curve(1)=FoodFitness;
+fprintf('SSA: Iteration %d    fitness: %4.3f \n', 1, food_fit);
+conv_curve(1)=food_fit;
 
 %Main loop
 l=2; % start from the second iteration since the first iteration was dedicated to calculating the fitness of salps
-while l<Max_iter+1
+while l<Max_Iter+1
     
-    c1 = 2*exp(-(4*l/Max_iter)^2); % Eq. (3.2) in the paper
+    c1 = 2*exp(-(4*l/Max_Iter)^2); % Eq. (3.2) in the paper
     
     for i=1:size(SalpPositions,1)
         
         SalpPositions= SalpPositions';
         
-        if i<=N/2
-            for j=1:1:dim
+        if i<=N_P/2
+            for j=1:1:N_Var
                 c2=rand();
                 c3=rand();
                 %%%%%%%%%%%%% % Eq. (3.1) in the paper %%%%%%%%%%%%%%
                 if c3<0.5 
-                    SalpPositions(j,i)=FoodPosition(j)+c1*((ub(j)-lb(j))*c2+lb(j));
+                    SalpPositions(j,i)=food_pos(j)+c1*((UB(j)-LB(j))*c2+LB(j));
                 else
-                    SalpPositions(j,i)=FoodPosition(j)-c1*((ub(j)-lb(j))*c2+lb(j));
+                    SalpPositions(j,i)=food_pos(j)-c1*((UB(j)-LB(j))*c2+LB(j));
                 end
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             end
             
-        elseif i>N/2 && i<N+1
+        elseif i>N_P/2 && i<N_P+1
             point1=SalpPositions(:,i-1);
             point2=SalpPositions(:,i);
             
@@ -129,23 +129,23 @@ while l<Max_iter+1
     
     for i=1:size(SalpPositions,1)
         
-        Tp=SalpPositions(i,:)>ub;
-        Tm=SalpPositions(i,:)<lb;
-        SalpPositions(i,:)= SalpPositions(i,:).*~(Tp+Tm) + ub.*Tp + lb.*Tm;
+        Tp=SalpPositions(i,:)>UB;
+        Tm=SalpPositions(i,:)<LB;
+        SalpPositions(i,:)= SalpPositions(i,:).*~(Tp+Tm) + UB.*Tp + LB.*Tm;
         
 %         SalpFitness(1,i)=fobj(SalpPositions(i,:));
                      SalpFitness(1,i) = feval(fobj,SalpPositions(i,:)', X, y);
 
         
-        if SalpFitness(1,i)<FoodFitness
-            FoodPosition=SalpPositions(i,:);
-            FoodFitness=SalpFitness(1,i);
+        if SalpFitness(1,i)<food_fit
+            food_pos=SalpPositions(i,:);
+            food_fit=SalpFitness(1,i);
             
         end
     end
     
-    fprintf('SSA: Iteration %d    fitness: %4.3f \n', l, FoodFitness);
-    Convergence_curve(l)=FoodFitness;
+    fprintf('SSA: Iteration %d    fitness: %4.3f \n', l, food_fit);
+    conv_curve(l)=food_fit;
     l = l + 1;
     
     % PUT THIS CODE INSIDE LOOP OF ITERATIONS
@@ -153,7 +153,7 @@ while l<Max_iter+1
 
     % Population diversity as a whole
 end
-fprintf('SSA: Final fitness: %4.3f \n', FoodFitness);
+fprintf('SSA: Final fitness: %4.3f \n', food_fit);
 
 
 function Positions=initializations(SearchAgents_no,dim,ub,lb)
