@@ -102,7 +102,7 @@ for tt = 1 : Max_Iter
         currentX = Swarm.Particles(k).X;
         position_history(k , tt , : ) = currentX;      
         
-        Swarm.Particles(k).O = fobj(currentX, X, y);
+        Swarm.Particles(k).O = fobj(currentX  > (LB+UB)/2, X, y);
 %         average_objective(t) =  average_objective(t)  + Swarm.Particles(k).O;
         
         % Update the PBEST

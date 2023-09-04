@@ -97,7 +97,7 @@ while tt < Max_Iter
         Pos(ii,:) = LB(Pos(ii,:)<LB);
                 
         % Calculate objective function for each search agent
-        fitness = fobj(Pos(ii,:), X, y);
+        fitness = fobj(Pos(ii,:) > (LB+UB)/2, X, y);
         
         % Update alpha, beta, and delta
         if fitness<alpha_fit 
