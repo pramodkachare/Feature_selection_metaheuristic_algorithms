@@ -60,6 +60,7 @@ end
 if nargin < 9
     verbose = 1; % Print progress after each iteration
 end
+
 %Start timer
 timer = tic();
 
@@ -153,6 +154,9 @@ while l<Max_Iter+1
 
     % Population diversity as a whole
 end
+
+CT = toc(timer);       % Total computation time in seconds
+
 fprintf('SSA: Final fitness: %4.3f \n', food_fit);
 
 
