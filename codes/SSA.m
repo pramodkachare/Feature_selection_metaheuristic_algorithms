@@ -25,6 +25,43 @@
 
 
 function [FoodFitness,FoodPosition,Convergence_curve]=SSA(N,Max_iter,lb,ub,dim,fobj, X, y)
+if nargin < 1
+    error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
+end
+
+if nargin < 2  % If only data is given, assume last column as target
+    y = X(:, end);
+    X = X(:, 1:end-1);
+end
+
+if nargin < 3  % Default 10 search agents
+    N_P = 10;
+end
+
+if nargin < 4
+    fobj = str2func('split_fitness'); % Apply feature selection
+end
+
+if nargin < 5
+    N_Var = size(X, 2); % Apply feature selection on columns of X
+end
+
+if nargin < 6
+    Max_Iter = 100;     % Run optimization for max 100 iterations
+end
+
+if nargin < 8
+    UB = 1;     % Assume upper limit for each variable is 1
+end
+if nargin < 7
+    LB = 0;     % Assume lower limit for each variable is 0
+end
+
+if nargin < 9
+    verbose = 1; % Print progress after each iteration
+end
+%Start timer
+timer = tic();
 
 if size(ub,2)==1
     ub=ones(1, dim)*ub;
@@ -36,17 +73,13 @@ Convergence_curve = zeros(1,Max_iter);
 %Initialize the positions of salps
 SalpPositions=initializations(N,dim,ub,lb);
 
-
 FoodPosition=zeros(1,dim);
 FoodFitness=inf;
 
-
 %calculate the fitness of initial salps
-
 for i=1:size(SalpPositions,1)
 %     SalpFitness(1,i)=fobj(SalpPositions(i,:));
              SalpFitness(1,i) = feval(fobj,SalpPositions(i,:)', X, y);
-
 end
 
 [sorted_salps_fitness,sorted_indexes]=sort(SalpFitness);
