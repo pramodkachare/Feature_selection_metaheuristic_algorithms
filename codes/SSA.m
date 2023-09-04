@@ -81,7 +81,7 @@ conv_curve = zeros(1,Max_Iter);
 %calculate the fitness of initial salps
 salp_fit = inf*ones(1, N_P);
 for ii=1:N_P
-    salp_fit(1,ii) = feval(fobj,salp_pos(ii,:)', X, y);
+    salp_fit(1,ii) = feval(fobj,salp_pos(ii,:) > (LB+UB)/2, X, y);
 end
 
 [sorted_salps_fitness,sorted_indexes]=sort(salp_fit);
@@ -98,27 +98,25 @@ tt=2; % start from the second iteration since the first iteration was dedicated 
 while tt <= Max_Iter
     c1 = 2*exp(-(4*tt/Max_Iter)^2); % Eq. (3.2) in the paper
     for ii = 1:N_P
-        salp_pos= salp_pos';
         if ii <= N_P/2
             for jj=1:1:N_Var
                 c2=rand();
                 c3=rand();
                 %%%%%%%%%%%%% % Eq. (3.1) in the paper %%%%%%%%%%%%%%
                 if c3<0.5 
-                    salp_pos(jj,ii)=food_pos(jj)+c1*((UB(jj)-LB(jj))*c2+LB(jj));
+                    salp_pos(ii,jj)=food_pos(jj)+c1*((UB(jj)-LB(jj))*c2+LB(jj));
                 else
-                    salp_pos(jj,ii)=food_pos(jj)-c1*((UB(jj)-LB(jj))*c2+LB(jj));
+                    salp_pos(ii,jj)=food_pos(jj)-c1*((UB(jj)-LB(jj))*c2+LB(jj));
                 end
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             end
             
         elseif ii>N_P/2 && ii<N_P+1
-            point1=salp_pos(:,ii-1);
-            point2=salp_pos(:,ii);
+            point1=salp_pos(ii-1, :);
+            point2=salp_pos(ii, :);
             
-            salp_pos(:,ii)=(point2+point1)/2; % % Eq. (3.4) in the paper
+            salp_pos(ii, :)=(point2+point1)/2; % % Eq. (3.4) in the paper
         end
-        salp_pos= salp_pos';
     end
     
     for ii=1:N_P
