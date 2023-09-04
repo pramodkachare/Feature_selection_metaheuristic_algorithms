@@ -1,6 +1,6 @@
 %SSA Salp Swarm Algorithm
-% [GBEST, GPOS, cgCurve, CT] = PSO (X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
-% 
+% [food_fit, food_pos, conv_curve, CT] = SSA(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+%
 %   Main paper: Mirjalili, S., Gandomi, A. H., Mirjalili, S. Z., Saremi, S.,
 %               Faris, H., Mirjalili, S. M. (2017). 
 %               Salp Swarm Algorithm: A bio-inspired optimizer for 
@@ -8,20 +8,20 @@
 %               Advances in Engineering Software, 114, 163-191.
 %               DOI: 10.1016/j.advengsoft.2017.07.002
 % 
-%     [GBEST, GPOS] = PSO(X) applies feature selection on M-by-N matrix X
+%     [food_fit, food_pos] = SSA(X) applies feature selection on M-by-N matrix X
 %     with N examples and assuming last column as the classification target 
-%     and returns the best fitness value GBEST and 1-by-(M-1) logical matrix
-%     of selected features GPOS.
+%     and returns the best fitness value food_fit and 1-by-(M-1) logical matrix
+%     of selected features food_pos.
 %
-%     [GBEST, GPOS] = PSO(X, y) applies feature selection on M-by-N feature 
+%     [food_fit, food_pos] = SSA(X, y) applies feature selection on M-by-N feature 
 %     matrix X and 1-by-N target matrix y and returns the best fitness value
-%     GBEST and 1-by-(M-1) logical matrix of selected features GPOS.
+%     food_fit and 1-by-(M-1) logical matrix of selected features food_pos.
 %     
 %     Example:
 %
 %
 % Original Author: Dr. Seyedali Mirjalili
-% Revised by : Pramod H. Kachare (Aug 2023)
+% Revised by : Pramod H. Kachare (Sep 2023)
 
 
 function [food_fit, food_pos, conv_curve, CT]=SSA(X, y, N_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
@@ -123,7 +123,7 @@ while tt <= Max_Iter
         Tp=salp_pos(ii,:)>UB;
         Tm=salp_pos(ii,:)<LB;
         salp_pos(ii,:)= salp_pos(ii,:).*~(Tp+Tm) + UB.*Tp + LB.*Tm;
-        
+
         salp_fit(1,ii) = feval(fobj,salp_pos(ii,:)', X, y);
         
         if salp_fit(1,ii)<food_fit
