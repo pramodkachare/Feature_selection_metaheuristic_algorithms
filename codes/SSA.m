@@ -64,29 +64,29 @@ end
 %Start timer
 timer = tic();
 
-if size(UB,2)==1
-    UB=ones(1, N_Var)*UB;
-    LB=ones(1, N_Var)*LB;
+%Initialize the positions of search agents
+if length(UB) == 1    % If same limit is applied on all variables
+    UB = repmat(UB, 1, N_Var);
+    LB = repmat(LB, 1, N_Var);
+end
+
+% If each variable has a different lb and ub
+salp_pos = zeros(N_P, N_Var);
+for ii = 1:N_P
+    salp_pos(ii, :) = (UB-LB) .* rand(1,N_Var) + LB;
 end
 
 conv_curve = zeros(1,Max_Iter);
 
-%Initialize the positions of salps
-SalpPositions=initializations(N_P,N_Var,UB,LB);
-
-food_pos=zeros(1,N_Var);
-food_fit=inf;
-
 %calculate the fitness of initial salps
-for i=1:size(SalpPositions,1)
-%     SalpFitness(1,i)=fobj(SalpPositions(i,:));
-             SalpFitness(1,i) = feval(fobj,SalpPositions(i,:)', X, y);
+for i=1:size(salp_pos,1)
+    salp_fit(1,i) = feval(fobj,salp_pos(i,:)', X, y);
 end
 
-[sorted_salps_fitness,sorted_indexes]=sort(SalpFitness);
+[sorted_salps_fitness,sorted_indexes]=sort(salp_fit);
 
 for newindex=1:N_P
-    Sorted_salps(newindex,:)=SalpPositions(sorted_indexes(newindex),:);
+    Sorted_salps(newindex,:)=salp_pos(sorted_indexes(newindex),:);
 end
 
 food_pos=Sorted_salps(1,:);
@@ -101,9 +101,9 @@ while tt <= Max_Iter
     
     c1 = 2*exp(-(4*tt/Max_Iter)^2); % Eq. (3.2) in the paper
     
-    for i=1:size(SalpPositions,1)
+    for i=1:size(salp_pos,1)
         
-        SalpPositions= SalpPositions';
+        salp_pos= salp_pos';
         
         if i<=N_P/2
             for j=1:1:N_Var
@@ -111,36 +111,36 @@ while tt <= Max_Iter
                 c3=rand();
                 %%%%%%%%%%%%% % Eq. (3.1) in the paper %%%%%%%%%%%%%%
                 if c3<0.5 
-                    SalpPositions(j,i)=food_pos(j)+c1*((UB(j)-LB(j))*c2+LB(j));
+                    salp_pos(j,i)=food_pos(j)+c1*((UB(j)-LB(j))*c2+LB(j));
                 else
-                    SalpPositions(j,i)=food_pos(j)-c1*((UB(j)-LB(j))*c2+LB(j));
+                    salp_pos(j,i)=food_pos(j)-c1*((UB(j)-LB(j))*c2+LB(j));
                 end
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             end
             
         elseif i>N_P/2 && i<N_P+1
-            point1=SalpPositions(:,i-1);
-            point2=SalpPositions(:,i);
+            point1=salp_pos(:,i-1);
+            point2=salp_pos(:,i);
             
-            SalpPositions(:,i)=(point2+point1)/2; % % Eq. (3.4) in the paper
+            salp_pos(:,i)=(point2+point1)/2; % % Eq. (3.4) in the paper
         end
         
-        SalpPositions= SalpPositions';
+        salp_pos= salp_pos';
     end
     
-    for i=1:size(SalpPositions,1)
+    for i=1:size(salp_pos,1)
         
-        Tp=SalpPositions(i,:)>UB;
-        Tm=SalpPositions(i,:)<LB;
-        SalpPositions(i,:)= SalpPositions(i,:).*~(Tp+Tm) + UB.*Tp + LB.*Tm;
+        Tp=salp_pos(i,:)>UB;
+        Tm=salp_pos(i,:)<LB;
+        salp_pos(i,:)= salp_pos(i,:).*~(Tp+Tm) + UB.*Tp + LB.*Tm;
         
 %         SalpFitness(1,i)=fobj(SalpPositions(i,:));
-                     SalpFitness(1,i) = feval(fobj,SalpPositions(i,:)', X, y);
+                     salp_fit(1,i) = feval(fobj,salp_pos(i,:)', X, y);
 
         
-        if SalpFitness(1,i)<food_fit
-            food_pos=SalpPositions(i,:);
-            food_fit=SalpFitness(1,i);
+        if salp_fit(1,i)<food_fit
+            food_pos=salp_pos(i,:);
+            food_fit=salp_fit(1,i);
             
         end
     end
@@ -158,25 +158,3 @@ end
 CT = toc(timer);       % Total computation time in seconds
 
 fprintf('SSA: Final fitness: %4.3f \n', food_fit);
-
-
-function Positions=initializations(SearchAgents_no,dim,ub,lb)
-    Boundary_no= length(ub); % numnber of boundaries
-
-    % If the boundaries of all variables are equal and user enter a signle
-    % number for both ub and lb
-    if Boundary_no==1
-        Positions=rand(SearchAgents_no,dim).*(ub-lb)+lb;
-    end
-
-    % If each variable has a different lb and ub
-    if Boundary_no>1
-        for i=1:dim
-            ub_i=ub(i);
-            lb_i=lb(i);
-            Positions(:,i)=rand(SearchAgents_no,1).*(ub_i-lb_i)+lb_i;
-        end
-    end
-
-
-
