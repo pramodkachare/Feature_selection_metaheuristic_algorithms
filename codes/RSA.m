@@ -1,4 +1,29 @@
-function [Best_F,Best_P,Conv]=RSA(N,T,LB,UB,N_Var,F_obj, data, target)
+%RSA Reptile Search Algorithm (RSA)
+% [Best_F,Best_P, conv_curve, CT] = RSA (X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+% 
+%   Main paper: Abualigah, L., Abd Elaziz, M., Sumari, P., Geem, Z. W., 
+%               & Gandomi, A. H. (2022). 
+%               Reptile Search Algorithm (RSA): A nature-inspired 
+%               meta-heuristic optimizer
+%               Expert Systems with Applications, 191, 116158.
+%               DOI: 10.1016/j.eswa.2021.116158 
+% 
+%     [Best_F, Best_P] = RSA(X) applies feature selection on M-by-N matrix X
+%     with N examples and assuming last column as the classification target 
+%     and returns the best fitness value Best_F and 1-by-(M-1) logical matrix
+%     of selected features Best_P.
+%
+%     [Best_F, Best_P] = PSO(X, y) applies feature selection on M-by-N feature 
+%     matrix X and 1-by-N target matrix y and returns the best fitness value
+%     GBEST and 1-by-(M-1) logical matrix of selected features GPOS.
+%     
+%     Example:
+%
+%
+% Original Author: Dr. Seyedali Mirjalili
+% Revised by : Pramod H. Kachare (Aug 2023)
+
+function [Best_F, Best_P, Conv]=RSA(N,T,LB,UB,N_Var,F_obj, data, target)
     Best_P=zeros(1,N_Var);           % best positions
     Best_F=inf;                    % best fitness
     
