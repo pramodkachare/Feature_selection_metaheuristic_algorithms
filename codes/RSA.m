@@ -68,13 +68,16 @@ timer = tic();
     %Initialize the positions of search agents
     if length(UB)==1    % If same limit is applied on all variables
         UB = repmat(UB, 1, N_Var);
+    end
+    if length(LB)==1    % If same limit is applied on all variables
         LB = repmat(LB, 1, N_Var);
     end
 
+
     % If each variable has a different lb and ub
-    X = zeros(No_P, N_Var);
+    Pos = zeros(No_P, N_Var);
     for i=1:No_P
-        X(i, :)= (UB-LB) .* rand(1,N_Var) + LB;
+        Pos(i, :)= (UB-LB) .* rand(1,N_Var) + LB;
     end
    
     Xnew=zeros(No_P, N_Var);
@@ -84,29 +87,29 @@ timer = tic();
     t=1;                         % starting iteration
     Alpha=0.1;                   % the best value 0.1
     Beta=0.005;                  % the best value 0.005
-    Ffun=zeros(1,size(X,1));     % (old fitness values)
-    Ffun_new=zeros(1,size(X,1)); % (new fitness values)
+    Ffun=zeros(1,size(Pos,1));     % (old fitness values)
+    Ffun_new=zeros(1,size(Pos,1)); % (new fitness values)
 
-    for i=1:size(X,1) 
-        Ffun(1,i)=fobj(X(i,:), X, y);   %Calculate the fitness values of solutions
+    for i=1:size(Pos,1) 
+        Ffun(1,i)=fobj(Pos(i,:), X, y);   %Calculate the fitness values of solutions
             if Ffun(1,i)<Best_F
                 Best_F=Ffun(1,i);
-                Best_P=X(i,:)>0.5;
+                Best_P=Pos(i,:)>0.5;
             end
     end
 
 
     while t<Max_Iter+1  %Main loop %Update the Position of solutions
         ES=2*randn*(1-(t/Max_Iter));  % Probability Ratio
-        for i=2:size(X,1) 
-            for j=1:size(X,2)  
-                    R=Best_P(1,j)-X(randi([1 size(X,1)]),j)/((Best_P(1,j))+eps);
-                    P=Alpha+(X(i,j)-mean(X(i,:)))./(Best_P(1,j).*(UB(1, j)-LB(1, j))+eps);
+        for i=2:size(Pos,1) 
+            for j=1:size(Pos,2)  
+                    R=Best_P(1,j)-Pos(randi([1 size(Pos,1)]),j)/((Best_P(1,j))+eps);
+                    P=Alpha+(Pos(i,j)-mean(Pos(i,:)))./(Best_P(1,j).*(UB(1, j)-LB(1, j))+eps);
                     Eta=Best_P(1,j)*P;
                     if (t<Max_Iter/4)
                         Xnew(i,j)=Best_P(1,j)-Eta*Beta-R*rand;    
                     elseif (t<2*Max_Iter/4 && t>=Max_Iter/4)
-                        Xnew(i,j)=Best_P(1,j)*X(randi([1 size(X,1)]),j)*ES*rand;
+                        Xnew(i,j)=Best_P(1,j)*Pos(randi([1 size(Pos,1)]),j)*ES*rand;
                     elseif (t<3*Max_Iter/4 && t>=2*Max_Iter/4)
                         Xnew(i,j)=Best_P(1,j)*P*rand;
                     else
@@ -125,12 +128,12 @@ timer = tic();
                 end
 
                 if Ffun_new(1,i)<Ffun(1,i)
-                    X(i,:)=Xnew(i,:);
+                    Pos(i,:)=Xnew(i,:);
                     Ffun(1,i)=Ffun_new(1,i);
                 end
                 if Ffun(1,i)<Best_F
                     Best_F=Ffun(1,i);
-                    Best_P=X(i,:)>0.5;
+                    Best_P=Pos(i,:)>0.5;
                 end
         end
 
