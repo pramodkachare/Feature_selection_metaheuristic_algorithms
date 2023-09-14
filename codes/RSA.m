@@ -62,103 +62,89 @@ end
 %Start timer
 timer = tic();
 
-    Best_P=zeros(1,N_Var);           % best positions
-    Best_F=inf;                    % best fitness
-    
-    %Initialize the positions of search agents
-    if length(UB)==1    % If same limit is applied on all variables
-        UB = repmat(UB, 1, N_Var);
-    end
-    if length(LB)==1    % If same limit is applied on all variables
-        LB = repmat(LB, 1, N_Var);
-    end
+Best_P=zeros(1,N_Var);           % best positions
+Best_F=inf;                    % best fitness
+
+%Initialize the positions of search agents
+if length(UB)==1    % If same limit is applied on all variables
+    UB = repmat(UB, 1, N_Var);
+end
+if length(LB)==1    % If same limit is applied on all variables
+    LB = repmat(LB, 1, N_Var);
+end
 
 
-    % If each variable has a different lb and ub
-    Pos = zeros(No_P, N_Var);
-    for i=1:No_P
-        Pos(i, :)= (UB-LB) .* rand(1,N_Var) + LB;
-    end
-   
-    Xnew=zeros(No_P, N_Var);
-    conv_curve=zeros(1,Max_Iter);               % Convergance array
+% If each variable has a different lb and ub
+Pos = zeros(No_P, N_Var);
+for i=1:No_P
+    Pos(i, :)= (UB-LB) .* rand(1,N_Var) + LB;
+end
+
+Xnew=zeros(No_P, N_Var);
+conv_curve=zeros(1,Max_Iter);               % Convergance array
 
 
-    t=1;                         % starting iteration
-    Alpha=0.1;                   % the best value 0.1
-    Beta=0.005;                  % the best value 0.005
-    Ffun=zeros(1,size(Pos,1));     % (old fitness values)
-    Ffun_new=zeros(1,size(Pos,1)); % (new fitness values)
+t=1;                         % starting iteration
+Alpha=0.1;                   % the best value 0.1
+Beta=0.005;                  % the best value 0.005
+Ffun=zeros(1,size(Pos,1));     % (old fitness values)
+Ffun_new=zeros(1,size(Pos,1)); % (new fitness values)
 
-    for i=1:size(Pos,1) 
-        Ffun(1,i)=fobj(Pos(i,:), X, y);   %Calculate the fitness values of solutions
+for i=1:size(Pos,1) 
+    Ffun(1,i)=fobj(Pos(i,:), X, y);   %Calculate the fitness values of solutions
+        if Ffun(1,i)<Best_F
+            Best_F=Ffun(1,i);
+            Best_P=Pos(i,:)>0.5;
+        end
+end
+
+
+while t<Max_Iter+1  %Main loop %Update the Position of solutions
+    ES=2*randn*(1-(t/Max_Iter));  % Probability Ratio
+    for i=2:size(Pos,1) 
+        for j=1:size(Pos,2)  
+                R=Best_P(1,j)-Pos(randi([1 size(Pos,1)]),j)/((Best_P(1,j))+eps);
+                P=Alpha+(Pos(i,j)-mean(Pos(i,:)))./(Best_P(1,j).*(UB(1, j)-LB(1, j))+eps);
+                Eta=Best_P(1,j)*P;
+                if (t<Max_Iter/4)
+                    Xnew(i,j)=Best_P(1,j)-Eta*Beta-R*rand;    
+                elseif (t<2*Max_Iter/4 && t>=Max_Iter/4)
+                    Xnew(i,j)=Best_P(1,j)*Pos(randi([1 size(Pos,1)]),j)*ES*rand;
+                elseif (t<3*Max_Iter/4 && t>=2*Max_Iter/4)
+                    Xnew(i,j)=Best_P(1,j)*P*rand;
+                else
+                    Xnew(i,j)=Best_P(1,j)-Eta*eps-R*rand;
+                end
+        end
+
+            Flag_UB=Xnew(i,:)>UB; % check if they exceed (up) the boundaries
+            Flag_LB=Xnew(i,:)<LB; % check if they exceed (down) the boundaries
+            Xnew(i,:)=(Xnew(i,:).*(~(Flag_UB+Flag_LB)))+UB.*Flag_UB+LB.*Flag_LB;
+
+            if sum(Xnew(i,:) > 0.5) >1  % must have at least 1 feature
+                Ffun_new(1,i)=fobj(Xnew(i,:), X, y);
+            else
+                Ffun_new(1,i) = Ffun(1,i-1);
+            end
+
+            if Ffun_new(1,i)<Ffun(1,i)
+                Pos(i,:)=Xnew(i,:);
+                Ffun(1,i)=Ffun_new(1,i);
+            end
             if Ffun(1,i)<Best_F
                 Best_F=Ffun(1,i);
                 Best_P=Pos(i,:)>0.5;
             end
     end
 
+    conv_curve(t)=Best_F;  %Update the convergence curve
 
-    while t<Max_Iter+1  %Main loop %Update the Position of solutions
-        ES=2*randn*(1-(t/Max_Iter));  % Probability Ratio
-        for i=2:size(Pos,1) 
-            for j=1:size(Pos,2)  
-                    R=Best_P(1,j)-Pos(randi([1 size(Pos,1)]),j)/((Best_P(1,j))+eps);
-                    P=Alpha+(Pos(i,j)-mean(Pos(i,:)))./(Best_P(1,j).*(UB(1, j)-LB(1, j))+eps);
-                    Eta=Best_P(1,j)*P;
-                    if (t<Max_Iter/4)
-                        Xnew(i,j)=Best_P(1,j)-Eta*Beta-R*rand;    
-                    elseif (t<2*Max_Iter/4 && t>=Max_Iter/4)
-                        Xnew(i,j)=Best_P(1,j)*Pos(randi([1 size(Pos,1)]),j)*ES*rand;
-                    elseif (t<3*Max_Iter/4 && t>=2*Max_Iter/4)
-                        Xnew(i,j)=Best_P(1,j)*P*rand;
-                    else
-                        Xnew(i,j)=Best_P(1,j)-Eta*eps-R*rand;
-                    end
-            end
-
-                Flag_UB=Xnew(i,:)>UB; % check if they exceed (up) the boundaries
-                Flag_LB=Xnew(i,:)<LB; % check if they exceed (down) the boundaries
-                Xnew(i,:)=(Xnew(i,:).*(~(Flag_UB+Flag_LB)))+UB.*Flag_UB+LB.*Flag_LB;
-
-                if sum(Xnew(i,:) > 0.5) >1  % must have at least 1 feature
-                    Ffun_new(1,i)=fobj(Xnew(i,:), X, y);
-                else
-                    Ffun_new(1,i) = Ffun(1,i-1);
-                end
-
-                if Ffun_new(1,i)<Ffun(1,i)
-                    Pos(i,:)=Xnew(i,:);
-                    Ffun(1,i)=Ffun_new(1,i);
-                end
-                if Ffun(1,i)<Best_F
-                    Best_F=Ffun(1,i);
-                    Best_P=Pos(i,:)>0.5;
-                end
-        end
-
-        conv_curve(t)=Best_F;  %Update the convergence curve
-
-        if mod(t,1)==0  %Print the best universe details after every t iterations
-            fprintf('RSA: Iteration %d    fitness: %4.3f \n', t, Best_F);
-        end
-        t=t+1;
+    if mod(t,1)==0  %Print the best universe details after every t iterations
+        fprintf('RSA: Iteration %d    fitness: %4.3f \n', t, Best_F);
     end
-    CT = toc(timer);       % Total computation time in seconds
-    fprintf('RSA: Final fitness: %4.3f \n', Best_F);
+    t=t+1;
 end
+CT = toc(timer);       % Total computation time in seconds
+fprintf('RSA: Final fitness: %4.3f \n', Best_F);
 
-function X=initialization(N,Dim,UB,LB)
-    B_no= size(UB,2); % numnber of boundaries
-    if B_no==1
-        X=rand(N,Dim).*(UB-LB)+LB;
-    end
-    % If each variable has a different lb and ub
-    if B_no>1
-        for i=1:Dim
-            Ub_i=UB(i);
-            Lb_i=LB(i);
-            X(:,i)=rand(N,1).*(Ub_i-Lb_i)+Lb_i;
-        end
-    end
-end
+%% END OF RSA.m
