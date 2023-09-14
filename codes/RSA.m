@@ -141,12 +141,12 @@ while tt<Max_Iter+1  %Main loop %Update the Position of solutions
     end
     tt=tt+1;
 end
-
-if Ffun(1,ii)<Best_F
-    Best_F=Ffun(1,ii);
-    Best_P=Pos(ii,:)>0.5;
+for ii = 1: No_P
+    if Ffun(1,ii)<Best_F
+        Best_F=Ffun(1,ii);
+        Best_P=Pos(ii,:);
+    end
 end
-
 
 CT = toc(timer);       % Total computation time in seconds
 fprintf('RSA: Final fitness: %4.3f \n', Best_F);
