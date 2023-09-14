@@ -75,8 +75,8 @@ end
 
 % If each variable has a different lb and ub
 Pos = zeros(No_P, N_Var);
-for i=1:No_P
-    Pos(i, :)= (UB-LB) .* rand(1,N_Var) + LB;
+for ii=1:No_P
+    Pos(ii, :)= (UB(ii)-LB(ii)) .* rand(1, N_Var) + LB(ii);
 end
 
 Pos_new=zeros(No_P, N_Var);
@@ -89,49 +89,49 @@ Beta=0.005;                  % the best value 0.005
 Ffun=zeros(1,size(Pos,1));     % (old fitness values)
 Ffun_new=zeros(1,size(Pos,1)); % (new fitness values)
 
-for i=1:size(Pos,1) 
-    Ffun(1,i)=fobj(Pos(i,:), X, y);   %Calculate the fitness values of solutions
-        if Ffun(1,i)<Best_F
-            Best_F=Ffun(1,i);
-            Best_P=Pos(i,:)>0.5;
+for ii=1:size(Pos,1) 
+    Ffun(1,ii)=fobj(Pos(ii,:), X, y);   %Calculate the fitness values of solutions
+        if Ffun(1,ii)<Best_F
+            Best_F=Ffun(1,ii);
+            Best_P=Pos(ii,:)>0.5;
         end
 end
 
 
 while tt<Max_Iter+1  %Main loop %Update the Position of solutions
     ES=2*randn*(1-(tt/Max_Iter));  % Probability Ratio
-    for i=2:size(Pos,1) 
+    for ii=2:size(Pos,1) 
         for j=1:size(Pos,2)  
             R=Best_P(1,j)-Pos(randi([1 size(Pos,1)]),j)/((Best_P(1,j))+eps);
-            P=Alpha+(Pos(i,j)-mean(Pos(i,:)))./(Best_P(1,j).*(UB(1, j)-LB(1, j))+eps);
+            P=Alpha+(Pos(ii,j)-mean(Pos(ii,:)))./(Best_P(1,j).*(UB(1, j)-LB(1, j))+eps);
             Eta=Best_P(1,j)*P;
             if (tt<Max_Iter/4)
-                Pos_new(i,j)=Best_P(1,j)-Eta*Beta-R*rand;    
+                Pos_new(ii,j)=Best_P(1,j)-Eta*Beta-R*rand;    
             elseif (tt<2*Max_Iter/4 && tt>=Max_Iter/4)
-                Pos_new(i,j)=Best_P(1,j)*Pos(randi([1 size(Pos,1)]),j)*ES*rand;
+                Pos_new(ii,j)=Best_P(1,j)*Pos(randi([1 size(Pos,1)]),j)*ES*rand;
             elseif (tt<3*Max_Iter/4 && tt>=2*Max_Iter/4)
-                Pos_new(i,j)=Best_P(1,j)*P*rand;
+                Pos_new(ii,j)=Best_P(1,j)*P*rand;
             else
-                Pos_new(i,j)=Best_P(1,j)-Eta*eps-R*rand;
+                Pos_new(ii,j)=Best_P(1,j)-Eta*eps-R*rand;
             end
         end
-        Flag_UB=Pos_new(i,:)>UB; % check if they exceed (up) the boundaries
-        Flag_LB=Pos_new(i,:)<LB; % check if they exceed (down) the boundaries
-        Pos_new(i,:)=(Pos_new(i,:).*(~(Flag_UB+Flag_LB)))+UB.*Flag_UB+LB.*Flag_LB;
+        Flag_UB=Pos_new(ii,:)>UB; % check if they exceed (up) the boundaries
+        Flag_LB=Pos_new(ii,:)<LB; % check if they exceed (down) the boundaries
+        Pos_new(ii,:)=(Pos_new(ii,:).*(~(Flag_UB+Flag_LB)))+UB.*Flag_UB+LB.*Flag_LB;
 
-        if sum(Pos_new(i,:) > 0.5) >1  % must have at least 1 feature
-            Ffun_new(1,i)=fobj(Pos_new(i,:), X, y);
+        if sum(Pos_new(ii,:) > 0.5) >1  % must have at least 1 feature
+            Ffun_new(1,ii)=fobj(Pos_new(ii,:), X, y);
         else
-            Ffun_new(1,i) = Ffun(1,i-1);
+            Ffun_new(1,ii) = Ffun(1,ii-1);
         end
 
-        if Ffun_new(1,i)<Ffun(1,i)
-            Pos(i,:)=Pos_new(i,:);
-            Ffun(1,i)=Ffun_new(1,i);
+        if Ffun_new(1,ii)<Ffun(1,ii)
+            Pos(ii,:)=Pos_new(ii,:);
+            Ffun(1,ii)=Ffun_new(1,ii);
         end
-        if Ffun(1,i)<Best_F
-            Best_F=Ffun(1,i);
-            Best_P=Pos(i,:)>0.5;
+        if Ffun(1,ii)<Best_F
+            Best_F=Ffun(1,ii);
+            Best_P=Pos(ii,:)>0.5;
         end
     end
     conv_curve(tt)=Best_F;  %Update the convergence curve

@@ -80,7 +80,7 @@ vMin  = -vMax;
 % Initialize the particles
 for k = 1 : No_P
     % Particle position
-    Swarm.Particles(k).X = (UB-LB) .* rand(1,N_Var) + LB;
+    Swarm.Particles(k).X = (UB(ii)-LB(ii)) .* rand(1, N_Var) + LB(ii);
     % Particle velocity
     Swarm.Particles(k).V = zeros(1, N_Var);
     

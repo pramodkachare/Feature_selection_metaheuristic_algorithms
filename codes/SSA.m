@@ -75,7 +75,7 @@ end
 % If each variable has a different lb and ub
 salp_pos = zeros(N_P, N_Var);
 for ii = 1:N_P
-    salp_pos(ii, :) = (UB-LB) .* rand(1,N_Var) + LB;
+    salp_pos(ii, :) = (UB(ii)-LB(ii)) .* rand(1, N_Var) + LB(ii);
 end
 
 conv_curve = zeros(1,Max_Iter);
