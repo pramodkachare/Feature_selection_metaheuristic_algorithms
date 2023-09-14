@@ -23,7 +23,7 @@
 % Original Author: Dr. Seyedali Mirjalili
 % Revised by : Pramod H. Kachare (Aug 2023)
 
-function [Best_F, Best_P, Conv]=RSA(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+function [Best_F, Best_P, conv_curve, CT]=RSA(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 if nargin < 1
     error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
 end
@@ -59,6 +59,8 @@ end
 if nargin < 9
     verbose = 1; % Print progress after each iteration
 end
+%Start timer
+timer = tic();
 
     Best_P=zeros(1,N_Var);           % best positions
     Best_F=inf;                    % best fitness
@@ -76,7 +78,7 @@ end
     end
    
     Xnew=zeros(No_P, N_Var);
-    Conv=zeros(1,Max_Iter);               % Convergance array
+    conv_curve=zeros(1,Max_Iter);               % Convergance array
 
 
     t=1;                         % starting iteration
@@ -132,13 +134,14 @@ end
                 end
         end
 
-        Conv(t)=Best_F;  %Update the convergence curve
+        conv_curve(t)=Best_F;  %Update the convergence curve
 
         if mod(t,1)==0  %Print the best universe details after every t iterations
             fprintf('RSA: Iteration %d    fitness: %4.3f \n', t, Best_F);
         end
         t=t+1;
     end
+    CT = toc(timer);       % Total computation time in seconds
     fprintf('RSA: Final fitness: %4.3f \n', Best_F);
 end
 
