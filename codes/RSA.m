@@ -73,14 +73,13 @@ if length(LB)==1    % If same limit is applied on all variables
     LB = repmat(LB, 1, N_Var);
 end
 
-
 % If each variable has a different lb and ub
 Pos = zeros(No_P, N_Var);
 for i=1:No_P
     Pos(i, :)= (UB-LB) .* rand(1,N_Var) + LB;
 end
 
-Xnew=zeros(No_P, N_Var);
+Pos_new=zeros(No_P, N_Var);
 conv_curve=zeros(1,Max_Iter);               % Convergance array
 
 
@@ -107,27 +106,27 @@ while tt<Max_Iter+1  %Main loop %Update the Position of solutions
             P=Alpha+(Pos(i,j)-mean(Pos(i,:)))./(Best_P(1,j).*(UB(1, j)-LB(1, j))+eps);
             Eta=Best_P(1,j)*P;
             if (tt<Max_Iter/4)
-                Xnew(i,j)=Best_P(1,j)-Eta*Beta-R*rand;    
+                Pos_new(i,j)=Best_P(1,j)-Eta*Beta-R*rand;    
             elseif (tt<2*Max_Iter/4 && tt>=Max_Iter/4)
-                Xnew(i,j)=Best_P(1,j)*Pos(randi([1 size(Pos,1)]),j)*ES*rand;
+                Pos_new(i,j)=Best_P(1,j)*Pos(randi([1 size(Pos,1)]),j)*ES*rand;
             elseif (tt<3*Max_Iter/4 && tt>=2*Max_Iter/4)
-                Xnew(i,j)=Best_P(1,j)*P*rand;
+                Pos_new(i,j)=Best_P(1,j)*P*rand;
             else
-                Xnew(i,j)=Best_P(1,j)-Eta*eps-R*rand;
+                Pos_new(i,j)=Best_P(1,j)-Eta*eps-R*rand;
             end
         end
-        Flag_UB=Xnew(i,:)>UB; % check if they exceed (up) the boundaries
-        Flag_LB=Xnew(i,:)<LB; % check if they exceed (down) the boundaries
-        Xnew(i,:)=(Xnew(i,:).*(~(Flag_UB+Flag_LB)))+UB.*Flag_UB+LB.*Flag_LB;
+        Flag_UB=Pos_new(i,:)>UB; % check if they exceed (up) the boundaries
+        Flag_LB=Pos_new(i,:)<LB; % check if they exceed (down) the boundaries
+        Pos_new(i,:)=(Pos_new(i,:).*(~(Flag_UB+Flag_LB)))+UB.*Flag_UB+LB.*Flag_LB;
 
-        if sum(Xnew(i,:) > 0.5) >1  % must have at least 1 feature
-            Ffun_new(1,i)=fobj(Xnew(i,:), X, y);
+        if sum(Pos_new(i,:) > 0.5) >1  % must have at least 1 feature
+            Ffun_new(1,i)=fobj(Pos_new(i,:), X, y);
         else
             Ffun_new(1,i) = Ffun(1,i-1);
         end
 
         if Ffun_new(1,i)<Ffun(1,i)
-            Pos(i,:)=Xnew(i,:);
+            Pos(i,:)=Pos_new(i,:);
             Ffun(1,i)=Ffun_new(1,i);
         end
         if Ffun(1,i)<Best_F
