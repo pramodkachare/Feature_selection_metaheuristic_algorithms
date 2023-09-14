@@ -89,30 +89,30 @@ Beta=0.005;                  % the best value 0.005
 Ffun=zeros(1,size(Pos,1));     % (old fitness values)
 Ffun_new=zeros(1,size(Pos,1)); % (new fitness values)
 
-for ii=1:size(Pos,1) 
+for ii=1:No_P 
     Ffun(1,ii)=fobj(Pos(ii,:), X, y);   %Calculate the fitness values of solutions
-        if Ffun(1,ii)<Best_F
-            Best_F=Ffun(1,ii);
-            Best_P=Pos(ii,:)>0.5;
-        end
+    if Ffun(1,ii)<Best_F
+        Best_F=Ffun(1,ii);
+        Best_P=Pos(ii,:)>0.5;
+    end
 end
 
 
 while tt<Max_Iter+1  %Main loop %Update the Position of solutions
     ES=2*randn*(1-(tt/Max_Iter));  % Probability Ratio
-    for ii=2:size(Pos,1) 
-        for j=1:size(Pos,2)  
-            R=Best_P(1,j)-Pos(randi([1 size(Pos,1)]),j)/((Best_P(1,j))+eps);
-            P=Alpha+(Pos(ii,j)-mean(Pos(ii,:)))./(Best_P(1,j).*(UB(1, j)-LB(1, j))+eps);
-            Eta=Best_P(1,j)*P;
+    for ii=2:No_P 
+        for jj=1:N_Var
+            R=Best_P(1,jj)-Pos(randi([1 size(Pos,1)]),jj)/((Best_P(1,jj))+eps);
+            P=Alpha+(Pos(ii,jj)-mean(Pos(ii,:)))./(Best_P(1,jj).*(UB(1, jj)-LB(1, jj))+eps);
+            Eta=Best_P(1,jj)*P;
             if (tt<Max_Iter/4)
-                Pos_new(ii,j)=Best_P(1,j)-Eta*Beta-R*rand;    
+                Pos_new(ii,jj)=Best_P(1,jj)-Eta*Beta-R*rand;    
             elseif (tt<2*Max_Iter/4 && tt>=Max_Iter/4)
-                Pos_new(ii,j)=Best_P(1,j)*Pos(randi([1 size(Pos,1)]),j)*ES*rand;
+                Pos_new(ii,jj)=Best_P(1,jj)*Pos(randi([1 size(Pos,1)]),jj)*ES*rand;
             elseif (tt<3*Max_Iter/4 && tt>=2*Max_Iter/4)
-                Pos_new(ii,j)=Best_P(1,j)*P*rand;
+                Pos_new(ii,jj)=Best_P(1,jj)*P*rand;
             else
-                Pos_new(ii,j)=Best_P(1,j)-Eta*eps-R*rand;
+                Pos_new(ii,jj)=Best_P(1,jj)-Eta*eps-R*rand;
             end
         end
         Flag_UB=Pos_new(ii,:)>UB; % check if they exceed (up) the boundaries
@@ -141,6 +141,13 @@ while tt<Max_Iter+1  %Main loop %Update the Position of solutions
     end
     tt=tt+1;
 end
+
+if Ffun(1,ii)<Best_F
+    Best_F=Ffun(1,ii);
+    Best_P=Pos(ii,:)>0.5;
+end
+
+
 CT = toc(timer);       % Total computation time in seconds
 fprintf('RSA: Final fitness: %4.3f \n', Best_F);
 
