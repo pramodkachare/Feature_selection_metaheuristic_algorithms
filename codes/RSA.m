@@ -1,5 +1,5 @@
 %RSA Reptile Search Algorithm (RSA)
-% [Best_F,Best_P, conv_curve, CT] = RSA (X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+% [Best_F,Best_P, conv_curve, CT] = RSA(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 % 
 %   Main paper: Abualigah, L., Abd Elaziz, M., Sumari, P., Geem, Z. W., 
 %               & Gandomi, A. H. (2022). 
@@ -23,7 +23,8 @@
 % Original Author: Dr. Seyedali Mirjalili
 % Revised by : Pramod H. Kachare (Aug 2023)
 
-function [Best_F, Best_P, Conv]=RSA(N,T,LB,UB,N_Var,F_obj, data, target)
+function [Best_F, Best_P, Conv]=RSA(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+
     Best_P=zeros(1,N_Var);           % best positions
     Best_F=inf;                    % best fitness
     
@@ -34,13 +35,13 @@ function [Best_F, Best_P, Conv]=RSA(N,T,LB,UB,N_Var,F_obj, data, target)
     end
 
     % If each variable has a different lb and ub
-    X = zeros(N, N_Var);
-    for i=1:N
+    X = zeros(No_P, N_Var);
+    for i=1:No_P
         X(i, :)= (UB-LB) .* rand(1,N_Var) + LB;
     end
    
-    Xnew=zeros(N, N_Var);
-    Conv=zeros(1,T);               % Convergance array
+    Xnew=zeros(No_P, N_Var);
+    Conv=zeros(1,Max_Iter);               % Convergance array
 
 
     t=1;                         % starting iteration
@@ -50,7 +51,7 @@ function [Best_F, Best_P, Conv]=RSA(N,T,LB,UB,N_Var,F_obj, data, target)
     Ffun_new=zeros(1,size(X,1)); % (new fitness values)
 
     for i=1:size(X,1) 
-        Ffun(1,i)=F_obj(X(i,:), data, target);   %Calculate the fitness values of solutions
+        Ffun(1,i)=fobj(X(i,:), X, y);   %Calculate the fitness values of solutions
             if Ffun(1,i)<Best_F
                 Best_F=Ffun(1,i);
                 Best_P=X(i,:)>0.5;
@@ -58,18 +59,18 @@ function [Best_F, Best_P, Conv]=RSA(N,T,LB,UB,N_Var,F_obj, data, target)
     end
 
 
-    while t<T+1  %Main loop %Update the Position of solutions
-        ES=2*randn*(1-(t/T));  % Probability Ratio
+    while t<Max_Iter+1  %Main loop %Update the Position of solutions
+        ES=2*randn*(1-(t/Max_Iter));  % Probability Ratio
         for i=2:size(X,1) 
             for j=1:size(X,2)  
                     R=Best_P(1,j)-X(randi([1 size(X,1)]),j)/((Best_P(1,j))+eps);
                     P=Alpha+(X(i,j)-mean(X(i,:)))./(Best_P(1,j).*(UB(1, j)-LB(1, j))+eps);
                     Eta=Best_P(1,j)*P;
-                    if (t<T/4)
+                    if (t<Max_Iter/4)
                         Xnew(i,j)=Best_P(1,j)-Eta*Beta-R*rand;    
-                    elseif (t<2*T/4 && t>=T/4)
+                    elseif (t<2*Max_Iter/4 && t>=Max_Iter/4)
                         Xnew(i,j)=Best_P(1,j)*X(randi([1 size(X,1)]),j)*ES*rand;
-                    elseif (t<3*T/4 && t>=2*T/4)
+                    elseif (t<3*Max_Iter/4 && t>=2*Max_Iter/4)
                         Xnew(i,j)=Best_P(1,j)*P*rand;
                     else
                         Xnew(i,j)=Best_P(1,j)-Eta*eps-R*rand;
@@ -81,7 +82,7 @@ function [Best_F, Best_P, Conv]=RSA(N,T,LB,UB,N_Var,F_obj, data, target)
                 Xnew(i,:)=(Xnew(i,:).*(~(Flag_UB+Flag_LB)))+UB.*Flag_UB+LB.*Flag_LB;
 
                 if sum(Xnew(i,:) > 0.5) >1  % must have at least 1 feature
-                    Ffun_new(1,i)=F_obj(Xnew(i,:), data, target);
+                    Ffun_new(1,i)=fobj(Xnew(i,:), X, y);
                 else
                     Ffun_new(1,i) = Ffun(1,i-1);
                 end
