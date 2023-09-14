@@ -68,9 +68,10 @@ c1 = 2;
 c2 = 2;
 if length(UB)==1    % If same limit is applied on all variables
     UB = repmat(UB, 1, N_Var);
+end
+if length(LB)==1    % If same limit is applied on all variables
     LB = repmat(LB, 1, N_Var);
 end
-
 vMax = (UB - LB) .* 0.2;
 vMin  = -vMax;
 

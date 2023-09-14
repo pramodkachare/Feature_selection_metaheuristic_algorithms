@@ -65,8 +65,10 @@ end
 timer = tic();
 
 %Initialize the positions of search agents
-if length(UB) == 1    % If same limit is applied on all variables
+if length(UB)==1    % If same limit is applied on all variables
     UB = repmat(UB, 1, N_Var);
+end
+if length(LB)==1    % If same limit is applied on all variables
     LB = repmat(LB, 1, N_Var);
 end
 
