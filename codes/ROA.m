@@ -77,47 +77,37 @@ for ii=1:No_P
     Remora(ii, :)= (UB(ii)-LB(ii)) .* rand(1, N_Var) + LB(ii);
 end
 
-Prevgen{1}=Remora; 
 conv_curve=zeros(1,Max_Iter);
 
 tt=0;
 while tt<Max_Iter  
     
 %% Memory of previous generation
-    if tt<=1
-        PreviousRemora = Prevgen{1};
-    else
-        PreviousRemora = Prevgen{tt-1};
-    end
+    Prev_Remora = Remora;
     
 % Boundary check
-    for i=1:size(Remora,1)
-        Flag4Upperbound=Remora(i,:)>UB;
-        Flag4Lowerbound=Remora(i,:)<LB;
-        Remora(i,:)=(Remora(i,:).*(~(Flag4Upperbound+Flag4Lowerbound)))+UB.*Flag4Upperbound+LB.*Flag4Lowerbound;
-        fitness=fobj(Remora(i,:)> (LB+UB)/2, X, y);
+    for ii=1:size(Remora,1)
+        Flag_UB=Remora(ii,:)>UB;
+        Flag_LB=Remora(ii,:)<LB;
+        Remora(ii,:)=(Remora(ii,:).*(~(Flag_UB+Flag_LB)))+UB.*Flag_UB+LB.*Flag_LB;
+        fitness=fobj(Remora(ii,:)> (LB+UB)/2, X, y);
         
  % Evaluate fitness function of search agents   
- 
-		if fitness<Best_F 
+        if fitness<Best_F 
             Best_F=fitness; 
-            Best_Pos=Remora(i,:);
+            Best_Pos=Remora(ii,:);
         end
-        
     end
     
   % Make a experience attempt through equation (2)
-  
-    for j=1:size(Remora,1)
-        RemoraAtt = Remora(j,:)+(Remora(j,:)-PreviousRemora(j,:))*randn;                    %Equation(2)
+    for jj=1:size(Remora,1)
+        RemoraAtt = Remora(jj,:)+(Remora(jj,:)-Prev_Remora(jj,:))*randn;                    %Equation(2)
         
   % Calculate the fitness function value of the attempted solution (fitnessAtt)
-  
         fitnessAtt=fobj(RemoraAtt> (LB+UB)/2, X, y);
         
   % Calculate the fitness function value of the current solution (fitnessI)
-  
-        fitnessI=fobj(Remora(j,:)> (LB+UB)/2, X, y);
+        fitnessI=fobj(Remora(jj,:)> (LB+UB)/2, X, y);
         
   % Check if the current fitness (fitnessI) is better than the attempted fitness(fitnessAtt)
   % if No, Perform host feeding by equation (9)
@@ -126,19 +116,18 @@ while tt<Max_Iter
             V = 2*(1-tt/Max_Iter);                                                     % Equation (12)
             B = 2*V*rand-V;                                                                 % Equation (11)
             C = 0.1;
-            A = B*(Remora(j,:)-C*Best_Pos);                                               % Equation (10)
-            Remora(j,:)= Remora(j,:)+A;                                                     % Equation (9)
+            A = B*(Remora(jj,:)-C*Best_Pos);                                               % Equation (10)
+            Remora(jj,:)= Remora(jj,:)+A;                                                     % Equation (9)
             
   % If yes perform host conversion using equation (1) and (5)       
-  
         elseif randi([0 1],1)==0
             a=-(1+tt/Max_Iter);                                                        % Equation (7)
             alpha = rand*(a-1)+1;                                                           % Equation (6)
-            D = abs(Best_Pos-Remora(j,:));                                                % Equation (8)
-            Remora(j,:) = D*exp(alpha)*cos(2*pi*a)+Remora(j,:);                             % Equation (5)
+            D = abs(Best_Pos-Remora(jj,:));                                                % Equation (8)
+            Remora(jj,:) = D*exp(alpha)*cos(2*pi*a)+Remora(jj,:);                             % Equation (5)
         else 
             m=randperm(size(Remora,1));
-            Remora(j,:)=Best_Pos-((rand*(Best_Pos+Remora(m(1),:))/2)-Remora(m(1),:));   % Equation (1)
+            Remora(jj,:)=Best_Pos-((rand*(Best_Pos+Remora(m(1),:))/2)-Remora(m(1),:));   % Equation (1)
         end
     end
     
@@ -146,9 +135,10 @@ while tt<Max_Iter
     if mod(tt, verbose) == 0  %Print best particle details at fixed iters
       fprintf('ROA: Iteration %d    fitness: %4.3f \n', tt, Best_F);
     end
-    Prevgen{tt+1}=Remora; 
+
     conv_curve(tt)=Best_F;
 end   
 CT = toc(timer);       % Total computation time in seconds
 fprintf('ROA: Final fitness: %4.3f \n', Best_F);
 
+%% END OF ROA.m
