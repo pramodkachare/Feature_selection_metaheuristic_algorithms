@@ -63,9 +63,11 @@ timer = tic();
 
 Best_Pos=zeros(1,N_Var);
 Best_F=inf; 
-Remora=init(Search_Agents,N_Var,UB,LB); % Generate initial remora population
+
+Remora=init(No_P,N_Var,UB,LB); % Generate initial remora population
 Prevgen{1}=Remora; 
 conv_curve=zeros(1,Max_Iter);
+
 tt=0;
 while tt<Max_Iter  
     
@@ -83,7 +85,7 @@ while tt<Max_Iter
         Flag4Upperbound=Remora(i,:)>UB;
         Flag4Lowerbound=Remora(i,:)<LB;
         Remora(i,:)=(Remora(i,:).*(~(Flag4Upperbound+Flag4Lowerbound)))+UB.*Flag4Upperbound+LB.*Flag4Lowerbound;
-        fitness=fobj(Remora(i,:));
+        fitness=fobj(Remora(i,:)> (LB+UB)/2, X, y);
         
  % Evaluate fitness function of search agents   
  
@@ -101,11 +103,11 @@ while tt<Max_Iter
         
   % Calculate the fitness function value of the attempted solution (fitnessAtt)
   
-        fitnessAtt=fobj(RemoraAtt);
+        fitnessAtt=fobj(RemoraAtt> (LB+UB)/2, X, y);
         
   % Calculate the fitness function value of the current solution (fitnessI)
   
-        fitnessI=fobj(Remora(j,:));
+        fitnessI=fobj(Remora(j,:)> (LB+UB)/2, X, y);
         
   % Check if the current fitness (fitnessI) is better than the attempted fitness(fitnessAtt)
   % if No, Perform host feeding by equation (9)
