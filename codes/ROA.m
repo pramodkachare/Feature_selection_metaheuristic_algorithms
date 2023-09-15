@@ -22,7 +22,9 @@
 % Revised by : Pramod H. Kachare (Aug 2023)
 
 function [Best_F,Best_Pos,conv_curve, CT]=ROA(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
-tic;       
+%Start timer
+timer = tic();
+
 Best_Pos=zeros(1,N_Var);
 Best_F=inf; 
 Remora=init(Search_Agents,N_Var,UB,LB); % Generate initial remora population
@@ -92,11 +94,13 @@ while tt<Max_Iter
         end
     end
     
-  tt=tt+1 ;
-  fprintf('Iteration : %d, best score : %d\n',tt,Best_F)
-  Prevgen{tt+1}=Remora; 
-  conv_curve(tt)=Best_F;
-    end   
-end
-
+    tt=tt+1 ;
+    if mod(tt, verbose) == 0  %Print best particle details at fixed iters
+      fprintf('ROA: Iteration %d    fitness: %4.3f \n', tt, Best_F);
+    end
+    Prevgen{tt+1}=Remora; 
+    conv_curve(tt)=Best_F;
+end   
+CT = toc(timer);       % Total computation time in seconds
+fprintf('ROA: Final fitness: %4.3f \n', Best_F);
 
