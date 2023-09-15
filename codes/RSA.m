@@ -1,4 +1,4 @@
-%RSA Reptile Search Algorithm (RSA)
+%RSA Reptile Search Algorithm
 % [Best_F,Best_P, conv_curve, CT] = RSA(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 % 
 %   Main paper: Abualigah, L., Abd Elaziz, M., Sumari, P., Geem, Z. W., 
