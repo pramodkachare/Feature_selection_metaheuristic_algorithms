@@ -64,7 +64,19 @@ timer = tic();
 Best_Pos=zeros(1,N_Var);
 Best_F=inf; 
 
-Remora=init(No_P,N_Var,UB,LB); % Generate initial remora population
+if length(UB)==1    % If same limit is applied on all variables
+    UB = repmat(UB, 1, N_Var);
+end
+if length(LB)==1    % If same limit is applied on all variables
+    LB = repmat(LB, 1, N_Var);
+end
+
+% Generate initial remora population
+Remora = zeros(No_P, N_Var);
+for ii=1:No_P
+    Remora(ii, :)= (UB(ii)-LB(ii)) .* rand(1, N_Var) + LB(ii);
+end
+
 Prevgen{1}=Remora; 
 conv_curve=zeros(1,Max_Iter);
 
@@ -72,7 +84,6 @@ tt=0;
 while tt<Max_Iter  
     
 %% Memory of previous generation
-
     if tt<=1
         PreviousRemora = Prevgen{1};
     else
@@ -80,7 +91,6 @@ while tt<Max_Iter
     end
     
 % Boundary check
-
     for i=1:size(Remora,1)
         Flag4Upperbound=Remora(i,:)>UB;
         Flag4Lowerbound=Remora(i,:)<LB;
