@@ -23,7 +23,7 @@
 % Original Author: Dr. Seyedali Mirjalili
 % Revised by : Pramod H. Kachare (Aug 2023)
 
-function [Best_F, Best_P, conv_curve, CT]=RSA(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+function [Best_F, Best_Pos, conv_curve, CT]=RSA(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 if nargin < 1
     error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
 end
@@ -62,8 +62,9 @@ end
 %Start timer
 timer = tic();
 
-Best_P=zeros(1,N_Var);           % best positions
-Best_F=inf;                    % best fitness
+Best_P = zeros(1,N_Var);           % best positions (binary)
+Best_Pos = zeros(1,N_Var);         % best positions (numeric)
+Best_F=inf;                        % best fitness
 
 %Initialize the positions of search agents
 if length(UB)==1    % If same limit is applied on all variables
@@ -93,7 +94,8 @@ for ii=1:No_P
     Ffun(1,ii)=fobj(Pos(ii,:), X, y);   %Calculate the fitness values of solutions
     if Ffun(1,ii)<Best_F
         Best_F=Ffun(1,ii);
-        Best_P=Pos(ii,:)>0.5;
+        Best_P(1,:)=Pos(ii,:)>0.5;
+        Best_Pos(1,:)=Pos(ii,:);
     end
 end
 
@@ -131,7 +133,8 @@ while tt<Max_Iter+1  %Main loop %Update the Position of solutions
         end
         if Ffun(1,ii)<Best_F
             Best_F=Ffun(1,ii);
-            Best_P=Pos(ii,:)>0.5;
+            Best_P(1,:)=Pos(ii,:)>0.5;
+            Best_Pos(1,:)=Pos(ii,:);
         end
     end
     conv_curve(tt)=Best_F;  %Update the convergence curve
@@ -140,12 +143,6 @@ while tt<Max_Iter+1  %Main loop %Update the Position of solutions
         fprintf('RSA: Iteration %d    fitness: %4.3f \n', tt, Best_F);
     end
     tt=tt+1;
-end
-for ii = 1: No_P
-    if Ffun(1,ii)<Best_F
-        Best_F=Ffun(1,ii);
-        Best_P=Pos(ii,:);
-    end
 end
 
 CT = toc(timer);       % Total computation time in seconds
