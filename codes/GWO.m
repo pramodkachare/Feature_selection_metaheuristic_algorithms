@@ -10,12 +10,12 @@
 %     [alpha_score, alpha_pos] = GWO(X) applies feature selection on M-by-N 
 %     matrix X with N examples and assuming last column as the classification 
 %     target and returns the best fitness value alpha_score and 1-by-(M-1) 
-%     logical  matrix of selected features alpha_pos.
+%     matrix of feature positions alpha_pos.
 %
 %     [alpha_score, alpha_pos] = GWO(X, y) applies feature selection on 
 %     M-by-N feature matrix X and 1-by-N target matrix y and returns the 
-%     best fitness value  alpha_score and 1-by-(M-1) logical matrix of 
-%     selected features alpha_pos.
+%     best fitness value  alpha_score and 1-by-(M-1) matrix of feature 
+%     positions alpha_pos.
 %     
 %     Example:
 %

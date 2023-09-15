@@ -10,12 +10,12 @@
 % 
 %     [food_fit, food_pos] = SSA(X) applies feature selection on M-by-N matrix X
 %     with N examples and assuming last column as the classification target 
-%     and returns the best fitness value food_fit and 1-by-(M-1) logical matrix
-%     of selected features food_pos.
+%     and returns the best fitness value food_fit and 1-by-(M-1) matrix of 
+%     feature positions food_pos.
 %
 %     [food_fit, food_pos] = SSA(X, y) applies feature selection on M-by-N feature 
 %     matrix X and 1-by-N target matrix y and returns the best fitness value
-%     food_fit and 1-by-(M-1) logical matrix of selected features food_pos.
+%     food_fit and 1-by-(M-1) matrix of feature positions food_pos.
 %     
 %     Example:
 %

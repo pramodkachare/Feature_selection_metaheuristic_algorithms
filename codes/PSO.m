@@ -3,12 +3,12 @@
 % 
 %     [GBEST, GPOS] = PSO(X) applies feature selection on M-by-N matrix X
 %     with N examples and assuming last column as the classification target 
-%     and returns the best fitness value GBEST and 1-by-(M-1) logical matrix
-%     of selected features GPOS.
+%     and returns the best fitness value GBEST and 1-by-(M-1) matrix of 
+%     feature positions GPOS.
 %
 %     [GBEST, GPOS] = PSO(X, y) applies feature selection on M-by-N feature 
 %     matrix X and 1-by-N target matrix y and returns the best fitness value
-%     GBEST and 1-by-(M-1) logical matrix of selected features GPOS.
+%     GBEST and 1-by-(M-1)matrix of feature positions GPOS.
 %     
 %     Example:
 %
