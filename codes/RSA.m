@@ -91,10 +91,10 @@ Ffun=zeros(1,size(Pos,1));     % (old fitness values)
 Ffun_new=zeros(1,size(Pos,1)); % (new fitness values)
 
 for ii=1:No_P 
-    Ffun(1,ii)=fobj(Pos(ii,:), X, y);   %Calculate the fitness values of solutions
+    Ffun(1,ii)=fobj(Pos(ii,:)> (LB+UB)/2, X, y);   %Calculate the fitness values of solutions
     if Ffun(1,ii)<Best_F
         Best_F=Ffun(1,ii);
-        Best_P(1,:)=Pos(ii,:)>0.5;
+        Best_P(1,:)=Pos(ii,:)> (LB+UB)/2;
         Best_Pos(1,:)=Pos(ii,:);
     end
 end
@@ -122,7 +122,7 @@ while tt<Max_Iter+1  %Main loop %Update the Position of solutions
         Pos_new(ii,:)=(Pos_new(ii,:).*(~(Flag_UB+Flag_LB)))+UB.*Flag_UB+LB.*Flag_LB;
 
         if sum(Pos_new(ii,:) > 0.5) >1  % must have at least 1 feature
-            Ffun_new(1,ii)=fobj(Pos_new(ii,:), X, y);
+            Ffun_new(1,ii)=fobj(Pos_new(ii,:)> (LB+UB)/2, X, y);
         else
             Ffun_new(1,ii) = Ffun(1,ii-1);
         end
@@ -133,7 +133,7 @@ while tt<Max_Iter+1  %Main loop %Update the Position of solutions
         end
         if Ffun(1,ii)<Best_F
             Best_F=Ffun(1,ii);
-            Best_P(1,:)=Pos(ii,:)>0.5;
+            Best_P(1,:)=Pos(ii,:)> (LB+UB)/2;
             Best_Pos(1,:)=Pos(ii,:);
         end
     end
