@@ -18,7 +18,8 @@
 %     Example:
 %
 %
-% Original Author: Dr. Seyedali Mirjalili
+% Original Author: angelinbeni
+% (github.com/angelinbeni/Remora_Optimization_Algorithm)
 % Revised by : Pramod H. Kachare (Aug 2023)
 
 function [Best_F,Best_Pos,conv_curve, CT]=ROA(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
