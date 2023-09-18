@@ -1,5 +1,11 @@
 %PSO Particle Swarm Optimization
-% [GBEST, GPOS, cgCurve, CT] = PSO (data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+% [GBEST, GPOS, cgCurve, CT] = PSO(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+% 
+%   Main paper: Kennedy, J. & Eberhart, R. (1995, November). 
+%               Particle swarm optimization. 
+%               Proc. International Conference on Neural Networks (ICNN'95), 
+%               Perth, WA, Australia, 4, 1942-1948, IEEE. 
+%               DOI: 10.1109/ICNN.1995.488968
 % 
 %     [GBEST, GPOS] = PSO(data) applies feature selection on M-by-N matrix
 %     data with N examples and assuming last column as the classification target 
