@@ -21,7 +21,7 @@
 %
 % Original Author: angelinbeni
 % (github.com/angelinbeni/Remora_Optimization_Algorithm)
-% Revised by : Pramod H. Kachare (Aug 2023)
+% Revised by : Pramod H. Kachare (Sep 2023)
 
 function [Best_F, Best_P, conv_curve, CT] = SO(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 if nargin < 1
