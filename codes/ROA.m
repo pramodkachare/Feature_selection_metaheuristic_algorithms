@@ -6,12 +6,12 @@
 %               Expert Systems with Applications, 185, 115665.
 %               DOI: 10.1016/j.eswa.2021.115665 
 % 
-%     [Best_F, Best_P] = RSA(data) applies feature selection on M-by-N
+%     [Best_F, Best_P] = ROA(data) applies feature selection on M-by-N
 %     matrix data with N examples and assuming last column as the 
 %     classification target and returns the best fitness value Best_F and 
 %     1-by-(M-1) matrix of feature positions Best_P.
 %
-%     [Best_F, Best_P] = PSO(data, target) applies feature selection on 
+%     [Best_F, Best_P] = ROA(data, target) applies feature selection on 
 %     M-by-N feature matrix data and 1-by-N target matrix target and returns 
 %     the best fitness value GBEST and 1-by-(M-1) logical matrix of selected 
 %     features GPOS.
