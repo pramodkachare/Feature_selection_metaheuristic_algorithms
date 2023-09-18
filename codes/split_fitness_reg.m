@@ -9,8 +9,9 @@ function fitness = split_fitness_reg(Pos, X, y, lambda)
         reduced_x_train = X(:,f_ind);   % Reduced feature set
         
         % Test model for fitness
-        model = fitrsvm(reduced_x_train, y, 'NumNeighbors',5, 'kFold', 5);
-        loss_train = model.Rsquared.Adjusted;     % 5-fold CV loss
+        model = fitrsvm(reduced_x_train, y, 'Standardize', true, 'kFold', 5);
+        corr = corrcoef(kfoldPredict(model), y);
+        loss_train = corr(1,2)^2; % R_squared
         
 %       fitness = lambda * (1-acc) + (1-lambda) * fraction_selected_features
         fitness = lambda * loss_train + (1-lambda) * mean(f_ind);
