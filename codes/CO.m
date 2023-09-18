@@ -8,15 +8,14 @@
 %               Scientific reports, 12(1), 10953. 
 %               DOI: 10.1038/s41598-022-14338-z 
 % 
-%     [Best_F, Best_P] = RSA(data) applies feature selection on M-by-N
-%     matrix data with N examples and assuming last column as the 
-%     classification target and returns the best fitness value Best_F and 
-%     1-by-(M-1) matrix of feature positions Best_P.
+%     [Best_F, Best_P] = RSA(X) applies feature selection on M-by-N matrix X
+%     with N examples and assuming last column as the classification target 
+%     and returns the best fitness value Best_F and 1-by-(M-1) matrix of 
+%     feature positions Best_P.
 %
-%     [Best_F, Best_P] = PSO(data, target) applies feature selection on 
-%     M-by-N feature matrix data and 1-by-N target matrix target and returns
-%     the best fitness value GBEST and 1-by-(M-1) matrix of feature 
-%     positions Best_P.
+%     [Best_F, Best_P] = PSO(X, y) applies feature selection on M-by-N feature 
+%     matrix X and 1-by-N target matrix y and returns the best fitness value
+%     GBEST and 1-by-(M-1) matrix of feature positions Best_P.
 %     
 %     Example:
 %
@@ -74,7 +73,7 @@ if length(LB)==1    % If same limit is applied on all variables
     LB = repmat(LB, 1, N_Var);
 end
 
-m = 2;                    % Number of search agenets in a group
+m = fix(No_P/3);               % Number of search agenets in a group
         
 %% Generate initial population of cheetahs (Algorithm 1, L#2)
 empty_individual.Position = [];
@@ -92,9 +91,9 @@ end
 
 %% Initialization (Algorithm 1, L#3)
 pop1 = pop;               % Population's initial home position
-conv_curve = zeros(1,Max_Iter);            % Leader fittnes value in a current hunting period
+BestCost = zeros(1,Max_Iter);            % Leader fittnes value in a current hunting period
 X_best = BestSol;         % Prey solution sofar
-Globest = conv_curve;       % Prey fittnes value sofar
+conv_curve = BestCost;       % Prey fittnes value sofar
 
 %% Initial parameters
 tt = 0;                    % Hunting time counter (Algorithm 1, L#4)
@@ -122,7 +121,7 @@ while it <= Max_Iter % Algorithm 1, L#8
 
 %         kk=0;
         % Uncomment the follwing statements, it may improve the performance of CO
-        if ii<=2 && tt>2 && tt>ceil(0.2*T+1) && abs(conv_curve(tt-2)-conv_curve(tt-ceil(0.2*T+1)))<=0.0001*Globest(tt-1)
+        if ii<=2 && tt>2 && tt>ceil(0.2*T+1) && abs(BestCost(tt-2)-BestCost(tt-ceil(0.2*T+1)))<=0.0001*conv_curve(tt-1)
             X = X_best.Position;
             kk = 0;
         elseif ii == 3
@@ -196,7 +195,7 @@ while it <= Max_Iter % Algorithm 1, L#8
 
     %% Leave the prey and go back home (Algorithm 1, L#29)
     if tt>T && tt-round(T)-1>=1 && tt>2
-        if  abs(conv_curve(tt-1)-conv_curve(tt-round(T)-1))<=abs(0.01*conv_curve(tt-1))
+        if  abs(BestCost(tt-1)-BestCost(tt-round(T)-1))<=abs(0.01*BestCost(tt-1))
 
             % Change the leader position (Algorithm 1, L#30)
             best = X_best.Position;
@@ -215,23 +214,22 @@ while it <= Max_Iter % Algorithm 1, L#8
             tt = 1; % Reset the hunting time (Algorithm 1, L#32)
         end
     end
-
-    it = it +1; % Algorithm 1, L#34
-
     %% Update the prey (global best) position (Algorithm 1, L#35)
     if BestSol.Cost<X_best.Cost
         X_best=BestSol;
     end
-    conv_curve(tt)=BestSol.Cost;
-    Globest(1,tt)=X_best.Cost;
+    BestCost(tt)=BestSol.Cost;
+    conv_curve(1,tt)=X_best.Cost;
 
     %% Display
     if mod(it, verbose) == 0  %Print best particle details at fixed iters
-        fprintf('CO: Iteration %d    fitness: %4.3f \n', it, Globest(end));
+        fprintf('CO: Iteration %d    fitness: %4.3f \n', it, conv_curve(it));
     end
+    
+    it = it +1; % Algorithm 1, L#34
 end
-Best_F = X_best; % Global best fitness
-Best_P = Globest(end);  % Global best position
+Best_F = X_best.Position; % Global best fitness
+Best_P = X_best.Cost;  % Global best position
 CT = toc(timer);       % Total computation time in seconds
 
 fprintf('CO: Final fitness: %4.3f \n', Best_P);
