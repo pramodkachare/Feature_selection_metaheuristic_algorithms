@@ -119,16 +119,16 @@ while it <= Max_Iter % Algorithm 1, L#8
         Xb = BestSol.Position;  % The leader position
         Xbest = X_best.Position;% The pery position
 
-%         kk=0;
+%         kkk=0;
         % Uncomment the follwing statements, it may improve the performance of CO
         if ii<=2 && tt>2 && tt>ceil(0.2*T+1) && abs(BestCost(tt-2)-BestCost(tt-ceil(0.2*T+1)))<=0.0001*conv_curve(tt-1)
             X = X_best.Position;
-            kk = 0;
+            kkk = 0;
         elseif ii == 3
             X = BestSol.Position;
-            kk = -0.1*rand*tt/T;
+            kkk = -0.1*rand*tt/T;
         else
-            kk = 0.25;
+            kkk = 0.25;
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
         if mod(it,100)==0 || it==1
@@ -158,7 +158,7 @@ while it <= Max_Iter % Algorithm 1, L#8
             %% Algorithm 1, L#14
 
             r2 = rand;
-            r3 = kk+rand;
+            r3 = kkk+rand;
 
             %% Strategy selection mechanism
             if r2 <= r3              % Algorithm 1, L#15
