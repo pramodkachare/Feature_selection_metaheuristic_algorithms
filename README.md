@@ -4,5 +4,8 @@
 ### Particle Swarm Optimization (1995)
 Kennedy, J. & Eberhart, R. (1995, November). Particle swarm optimization. In _Proc. International Conference on Neural Networks (ICNN'95)_, Perth, WA, Australia, 4, 1942-1948, IEEE. [https://doi.org/10.1109/ICNN.1995.488968](https://doi.org/10.1109/ICNN.1995.488968)
 
-### Grey Wolf Optimization (1995)
+### Grey Wolf Optimization (2014)
 Mirjalili, S., Mirjalili, S. M., & Lewis, A. (2014). Grey wolf optimizer. _Advances in engineering software_, 69, 46-61. [https://doi.org/10.1016/j.advengsoft.2013.12.007](https://doi.org/10.1016/j.advengsoft.2013.12.007) 
+
+
+Jia, H., Peng, X., & Lang, C. (2021). Remora optimization algorithm. _Expert Systems with Applications_, 185, 115665. [10.1016/j.eswa.2021.115665](https://doi.org/10.1016/j.eswa.2021.115665)
