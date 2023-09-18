@@ -228,8 +228,8 @@ while it <= Max_Iter % Algorithm 1, L#8
     
     it = it +1; % Algorithm 1, L#34
 end
-Best_F = X_best.Position; % Global best fitness
-Best_P = X_best.Cost;  % Global best position
+Best_F = X_best.Cost; % Global best fitness
+Best_P = X_best.Position;  % Global best position
 CT = toc(timer);       % Total computation time in seconds
 
 fprintf('CO: Final fitness: %4.3f \n', Best_P);
