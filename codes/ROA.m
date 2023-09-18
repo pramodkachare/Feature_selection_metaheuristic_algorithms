@@ -1,19 +1,20 @@
 %ROA Reptile Search Algorithm
-% [Best_F,Best_P, conv_curve, CT] = ROA(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+% [Best_F,Best_P, conv_curve, CT] = ROA(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 % 
 %   Main paper: Jia, H., Peng, X., & Lang, C. (2021). 
 %               Remora optimization algorithm
 %               Expert Systems with Applications, 185, 115665.
 %               DOI: 10.1016/j.eswa.2021.115665 
 % 
-%     [Best_F, Best_P] = RSA(X) applies feature selection on M-by-N matrix X
-%     with N examples and assuming last column as the classification target 
-%     and returns the best fitness value Best_F and 1-by-(M-1) matrix of 
-%     feature positions Best_P.
+%     [Best_F, Best_P] = RSA(data) applies feature selection on M-by-N
+%     matrix data with N examples and assuming last column as the 
+%     classification target and returns the best fitness value Best_F and 
+%     1-by-(M-1) matrix of feature positions Best_P.
 %
-%     [Best_F, Best_P] = PSO(X, y) applies feature selection on M-by-N feature 
-%     matrix X and 1-by-N target matrix y and returns the best fitness value
-%     GBEST and 1-by-(M-1) logical matrix of selected features GPOS.
+%     [Best_F, Best_P] = PSO(data, target) applies feature selection on 
+%     M-by-N feature matrix data and 1-by-N target matrix target and returns 
+%     the best fitness value GBEST and 1-by-(M-1) logical matrix of selected 
+%     features GPOS.
 %     
 %     Example:
 %
@@ -22,14 +23,14 @@
 % (github.com/angelinbeni/Remora_Optimization_Algorithm)
 % Revised by : Pramod H. Kachare (Aug 2023)
 
-function [Best_F,Best_Pos,conv_curve, CT]=ROA(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+function [Best_F,Best_Pos,conv_curve, CT]=ROA(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 if nargin < 1
     error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
 end
 
 if nargin < 2  % If only data is given, assume last column as target
-    y = X(:, end);
-    X = X(:, 1:end-1);
+    target = data(:, end);
+    data = data(:, 1:end-1);
 end
 
 if nargin < 3  % Default 10 search agents
@@ -41,7 +42,7 @@ if nargin < 4
 end
 
 if nargin < 5
-    N_Var = size(X, 2); % Apply feature selection on columns of X
+    N_Var = size(data, 2); % Apply feature selection on columns of X
 end
 
 if nargin < 6
@@ -91,7 +92,7 @@ while tt<Max_Iter
         Flag_UB=Remora(ii,:)>UB;
         Flag_LB=Remora(ii,:)<LB;
         Remora(ii,:)=(Remora(ii,:).*(~(Flag_UB+Flag_LB)))+UB.*Flag_UB+LB.*Flag_LB;
-        fitness=fobj(Remora(ii,:)> (LB+UB)/2, X, y);
+        fitness=fobj(Remora(ii,:)> (LB+UB)/2, data, target);
         
  % Evaluate fitness function of search agents   
         if fitness<Best_F 
@@ -105,10 +106,10 @@ while tt<Max_Iter
         RemoraAtt = Remora(jj,:)+(Remora(jj,:)-Prev_Remora(jj,:))*randn;                    %Equation(2)
         
   % Calculate the fitness function value of the attempted solution (fitnessAtt)
-        fitnessAtt=fobj(RemoraAtt> (LB+UB)/2, X, y);
+        fitnessAtt=fobj(RemoraAtt> (LB+UB)/2, data, target);
         
   % Calculate the fitness function value of the current solution (fitnessI)
-        fitnessI=fobj(Remora(jj,:)> (LB+UB)/2, X, y);
+        fitnessI=fobj(Remora(jj,:)> (LB+UB)/2, data, target);
         
   % Check if the current fitness (fitnessI) is better than the attempted fitness(fitnessAtt)
   % if No, Perform host feeding by equation (9)

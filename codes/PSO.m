@@ -1,14 +1,14 @@
 %PSO Particle Swarm Optimization
-% [GBEST, GPOS, cgCurve, CT] = PSO (X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+% [GBEST, GPOS, cgCurve, CT] = PSO (data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 % 
-%     [GBEST, GPOS] = PSO(X) applies feature selection on M-by-N matrix X
-%     with N examples and assuming last column as the classification target 
+%     [GBEST, GPOS] = PSO(data) applies feature selection on M-by-N matrix
+%     data with N examples and assuming last column as the classification target 
 %     and returns the best fitness value GBEST and 1-by-(M-1) matrix of 
 %     feature positions GPOS.
 %
-%     [GBEST, GPOS] = PSO(X, y) applies feature selection on M-by-N feature 
-%     matrix X and 1-by-N target matrix y and returns the best fitness value
-%     GBEST and 1-by-(M-1)matrix of feature positions GPOS.
+%     [GBEST, GPOS] = PSO(data, target) applies feature selection on M-by-N 
+%     feature matrix data and 1-by-N target matrix target and returns the 
+%     best fitness value GBEST and 1-by-(M-1)matrix of feature positions GPOS.
 %     
 %     Example:
 %
@@ -16,14 +16,14 @@
 % Original Author: Dr. Seyedali Mirjalili
 % Revised by : Pramod H. Kachare (Aug 2023)
 
-function [GBEST,  GPOS, cgCurve, CT] = PSO (X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+function [GBEST,  GPOS, cgCurve, CT] = PSO (data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 if nargin < 1
     error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
 end
 
 if nargin < 2  % If only data is given, assume last column as target
-    y = X(:, end);
-    X = X(:, 1:end-1);
+    target = data(:, end);
+    data = data(:, 1:end-1);
 end
 
 if nargin < 3  % Default 10 search agents
@@ -35,7 +35,7 @@ if nargin < 4
 end
 
 if nargin < 5
-    N_Var = size(X, 2); % Apply feature selection on columns of X
+    N_Var = size(data, 2); % Apply feature selection on columns of X
 end
 
 if nargin < 6
@@ -103,7 +103,7 @@ for tt = 1 : Max_Iter
         currentX = Swarm.Particles(k).X;
         position_history(k , tt , : ) = currentX;      
         
-        Swarm.Particles(k).O = fobj(currentX  > (LB+UB)/2, X, y);
+        Swarm.Particles(k).O = fobj(currentX  > (LB+UB)/2, data, target);
 %         average_objective(t) =  average_objective(t)  + Swarm.Particles(k).O;
         
         % Update the PBEST

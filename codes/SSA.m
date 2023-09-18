@@ -1,5 +1,5 @@
 %SSA Salp Swarm Algorithm
-% [food_fit, food_pos, conv_curve, CT] = SSA(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+% [food_fit, food_pos, conv_curve, CT] = SSA(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 %
 %   Main paper: Mirjalili, S., Gandomi, A. H., Mirjalili, S. Z., Saremi, S.,
 %               Faris, H., Mirjalili, S. M. (2017). 
@@ -8,14 +8,15 @@
 %               Advances in Engineering Software, 114, 163-191.
 %               DOI: 10.1016/j.advengsoft.2017.07.002
 % 
-%     [food_fit, food_pos] = SSA(X) applies feature selection on M-by-N matrix X
-%     with N examples and assuming last column as the classification target 
-%     and returns the best fitness value food_fit and 1-by-(M-1) matrix of 
-%     feature positions food_pos.
+%     [food_fit, food_pos] = SSA(data) applies feature selection on M-by-N
+%     matrix data with N examples and assuming last column as the 
+%     classification target and returns the best fitness value food_fit and 
+%     1-by-(M-1) matrix of feature positions food_pos.
 %
-%     [food_fit, food_pos] = SSA(X, y) applies feature selection on M-by-N feature 
-%     matrix X and 1-by-N target matrix y and returns the best fitness value
-%     food_fit and 1-by-(M-1) matrix of feature positions food_pos.
+%     [food_fit, food_pos] = SSA(data, target) applies feature selection on 
+%     M-by-N feature matrix X and 1-by-N target matrix y and returns the 
+%     best fitness value food_fit and 1-by-(M-1) matrix of feature 
+%     positions food_pos.
 %     
 %     Example:
 %
@@ -24,14 +25,14 @@
 % Revised by : Pramod H. Kachare (Sep 2023)
 
 
-function [food_fit, food_pos, conv_curve, CT]=SSA(X, y, N_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+function [food_fit, food_pos, conv_curve, CT]=SSA(data, target, N_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 if nargin < 1
     error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
 end
 
 if nargin < 2  % If only data is given, assume last column as target
-    y = X(:, end);
-    X = X(:, 1:end-1);
+    target = data(:, end);
+    data = data(:, 1:end-1);
 end
 
 if nargin < 3  % Default 10 search agents
@@ -43,7 +44,7 @@ if nargin < 4
 end
 
 if nargin < 5
-    N_Var = size(X, 2); % Apply feature selection on columns of X
+    N_Var = size(data, 2); % Apply feature selection on columns of X
 end
 
 if nargin < 6
@@ -83,7 +84,7 @@ conv_curve = zeros(1,Max_Iter);
 %calculate the fitness of initial salps
 salp_fit = inf*ones(1, N_P);
 for ii=1:N_P
-    salp_fit(1,ii) = feval(fobj,salp_pos(ii,:) > (LB+UB)/2, X, y);
+    salp_fit(1,ii) = feval(fobj,salp_pos(ii,:) > (LB+UB)/2, data, target);
 end
 
 [sorted_salps_fitness,sorted_indexes]=sort(salp_fit);
@@ -126,7 +127,7 @@ while tt <= Max_Iter
         Tm=salp_pos(ii,:)<LB;
         salp_pos(ii,:)= salp_pos(ii,:).*~(Tp+Tm) + UB.*Tp + LB.*Tm;
 
-        salp_fit(1,ii) = feval(fobj,salp_pos(ii,:)', X, y);
+        salp_fit(1,ii) = feval(fobj,salp_pos(ii,:)', data, target);
         
         if salp_fit(1,ii)<food_fit
             food_pos=salp_pos(ii,:);

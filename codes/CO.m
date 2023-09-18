@@ -1,5 +1,5 @@
 %CO Cheetah Optimizaer
-% [Best_F,Best_P, conv_curve, CT] = CO(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+% [Best_F,Best_P, conv_curve, CT] = CO(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 % 
 %   Main paper: Akbari, M. A., Zare, M., Azizipanah-Abarghooee, R., 
 %               Mirjalili, S., & Deriche, M. (2022). 
@@ -8,14 +8,15 @@
 %               Scientific reports, 12(1), 10953. 
 %               DOI: 10.1038/s41598-022-14338-z 
 % 
-%     [Best_F, Best_P] = RSA(X) applies feature selection on M-by-N matrix X
-%     with N examples and assuming last column as the classification target 
-%     and returns the best fitness value Best_F and 1-by-(M-1) matrix of 
-%     feature positions Best_P.
+%     [Best_F, Best_P] = RSA(data) applies feature selection on M-by-N
+%     matrix data with N examples and assuming last column as the 
+%     classification target and returns the best fitness value Best_F and 
+%     1-by-(M-1) matrix of feature positions Best_P.
 %
-%     [Best_F, Best_P] = PSO(X, y) applies feature selection on M-by-N feature 
-%     matrix X and 1-by-N target matrix y and returns the best fitness value
-%     GBEST and 1-by-(M-1) matrix of feature positions Best_P.
+%     [Best_F, Best_P] = PSO(data, target) applies feature selection on 
+%     M-by-N feature matrix data and 1-by-N target matrix target and returns
+%     the best fitness value GBEST and 1-by-(M-1) matrix of feature 
+%     positions Best_P.
 %     
 %     Example:
 %
@@ -26,14 +27,14 @@
 % Revised by : Pramod H. Kachare (Aug 2023)
 
 
-function [Best_F,Best_P, conv_curve, CT] = CO(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+function [Best_F,Best_P, conv_curve, CT] = CO(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 if nargin < 1
     error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
 end
 
 if nargin < 2  % If only data is given, assume last column as target
-    y = X(:, end);
-    X = X(:, 1:end-1);
+    target = data(:, end);
+    data = data(:, 1:end-1);
 end
 
 if nargin < 3  % Default 10 search agents
@@ -45,7 +46,7 @@ if nargin < 4
 end
 
 if nargin < 5
-    N_Var = size(X, 2); % Apply feature selection on columns of X
+    N_Var = size(data, 2); % Apply feature selection on columns of X
 end
 
 if nargin < 6
@@ -83,7 +84,7 @@ pop = repmat(empty_individual,No_P,1);
 
 for ii=1:No_P
     pop(ii).Position = LB+rand(1,N_Var).*(UB-LB);
-    pop(ii).Cost = fobj(pop(ii).Position, X, y);
+    pop(ii).Cost = fobj(pop(ii).Position > (LB+UB)/2, data, target);
     if pop(ii).Cost < BestSol.Cost
         BestSol = pop(ii); % Initial leader position
     end
@@ -181,7 +182,7 @@ while it <= Max_Iter % Algorithm 1, L#8
 
         % Evaluate the new position
         NewSol.Position = Z;
-        NewSol.Cost = fobj(NewSol.Position, X, y);
+        NewSol.Cost = fobj(NewSol.Position  > (LB+UB)/2, data, target);
         if NewSol.Cost < pop(ii).Cost
             pop(ii) = NewSol;
             if pop(ii).Cost < BestSol.Cost
@@ -201,7 +202,7 @@ while it <= Max_Iter % Algorithm 1, L#8
             best = X_best.Position;
             j0=randi(N_Var,1,ceil(N_Var/10*rand));
             best(j0) = LB(j0)+rand(1,length(j0)).*(UB(j0)-LB(j0));
-            BestSol.Cost = fobj(best, X, y);
+            BestSol.Cost = fobj(best  > (LB+UB)/2, data, target);
             BestSol.Position = best; % Leader's new position 
             FEs = FEs+1;
 

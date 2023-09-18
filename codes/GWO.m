@@ -1,5 +1,5 @@
 %GWO Grey Wolf Optimizer
-% [alpha_score,alpha_pos,Convergence_curve, CT] = GWO(X, y, No_P, fobj,
+% [alpha_score,alpha_pos,Convergence_curve, CT] = GWO(data, target, No_P, fobj,
 % N_Var, Max_Iter, LB, UB, verbose)
 %
 %   Main paper: Mirjalili, S., Mirjalili, S. M., & Lewis, A. (2014). 
@@ -7,13 +7,13 @@
 %               Advances in Engineering Software, 69, 46–61.
 %               DOI: 10.1016/j.advengsoft.2013.12.007               
 % 
-%     [alpha_score, alpha_pos] = GWO(X) applies feature selection on M-by-N 
-%     matrix X with N examples and assuming last column as the classification 
+%     [alpha_score, alpha_pos] = GWO(data) applies feature selection on M-by-N 
+%     matrix data with N examples and assuming last column as the classification 
 %     target and returns the best fitness value alpha_score and 1-by-(M-1) 
 %     matrix of feature positions alpha_pos.
 %
-%     [alpha_score, alpha_pos] = GWO(X, y) applies feature selection on 
-%     M-by-N feature matrix X and 1-by-N target matrix y and returns the 
+%     [alpha_score, alpha_pos] = GWO(data, target) applies feature selection on 
+%     M-by-N feature matrix data and 1-by-N target matrix target and returns the 
 %     best fitness value  alpha_score and 1-by-(M-1) matrix of feature 
 %     positions alpha_pos.
 %     
@@ -23,14 +23,14 @@
 % Original Author: Dr. Seyedali Mirjalili
 % Revised by : Pramod H. Kachare (Aug 2023)
 
-function [alpha_fit,alpha_pos,conv_curve, CT] = GWO(X, y, N_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+function [alpha_fit,alpha_pos,conv_curve, CT] = GWO(data, target, N_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 if nargin < 1
     error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
 end
 
 if nargin < 2  % If only data is given, assume last column as target
-    y = X(:, end);
-    X = X(:, 1:end-1);
+    target = data(:, end);
+    data = data(:, 1:end-1);
 end
 
 if nargin < 3  % Default 10 search agents
@@ -42,7 +42,7 @@ if nargin < 4
 end
 
 if nargin < 5
-    N_Var = size(X, 2); % Apply feature selection on columns of X
+    N_Var = size(data, 2); % Apply feature selection on columns of X
 end
 
 if nargin < 6
@@ -99,7 +99,7 @@ while tt < Max_Iter
         Pos(ii,:) = LB(Pos(ii,:)<LB);
                 
         % Calculate objective function for each search agent
-        fitness = fobj(Pos(ii,:) > (LB+UB)/2, X, y);
+        fitness = fobj(Pos(ii,:) > (LB+UB)/2, data, target);
         
         % Update alpha, beta, and delta
         if fitness<alpha_fit 
