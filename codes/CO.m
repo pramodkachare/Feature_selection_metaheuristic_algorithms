@@ -27,6 +27,42 @@
 
 
 function [Best_F,Best_P, conv_curve, CT] = CO(X, y, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+if nargin < 1
+    error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
+end
+
+if nargin < 2  % If only data is given, assume last column as target
+    y = X(:, end);
+    X = X(:, 1:end-1);
+end
+
+if nargin < 3  % Default 10 search agents
+    No_P = 10;
+end
+
+if nargin < 4
+    fobj = str2func('split_fitness'); % Apply feature selection
+end
+
+if nargin < 5
+    N_Var = size(X, 2); % Apply feature selection on columns of X
+end
+
+if nargin < 6
+    Max_Iter = 100;     % Run optimization for max 100 iterations
+end
+
+if nargin < 8
+    UB = 1;     % Assume upper limit for each variable is 1
+end
+if nargin < 7
+    LB = 0;     % Assume lower limit for each variable is 0
+end
+
+if nargin < 9
+    verbose = 1; % Print progress after each iteration
+end
+
 if length(LB) == 1
     UB = UB.*ones(1,N_Var);   % Lower Bound of Decision Variables
     LB = LB.*ones(1,N_Var);   % Upper Bound of Decision Variables
