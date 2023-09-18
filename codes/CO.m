@@ -62,6 +62,8 @@ end
 if nargin < 9
     verbose = 1; % Print progress after each iteration
 end
+%Start timer
+timer = tic();
 
 if length(LB) == 1
     UB = UB.*ones(1,N_Var);   % Lower Bound of Decision Variables
@@ -224,11 +226,11 @@ while FEs <= Max_Iter % Algorithm 1, L#8
     if mod(it,500)==0
     disp([' FEs>> ' num2str(FEs) '   BestCost = ' num2str(Globest(tt))]);
     end
-
 end
+Best_F = X_best; % Global best fitness
+Best_P = Globest(end);  % Global best position
+CT = toc(timer);       % Total computation time in seconds
 
-%         fit(run) = Globest(end) ;
-%         mean_f = mean (fit);
-%         std_f = std (fit);
-%         clc
-        
+fprintf('CO: Final fitness: %4.3f \n', Best_P);
+
+%% END OF CO.m
