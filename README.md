@@ -16,5 +16,8 @@ Jia, H., Peng, X., & Lang, C. (2021). Remora optimization algorithm. _Expert Sys
 ### RSA : Reptile Search Algorithm (2022, April)
 Abualigah, L., Abd Elaziz, M., Sumari, P., Geem, Z. W., & Gandomi, A. H. (2022, April). Reptile Search Algorithm (RSA): A nature-inspired meta-heuristic optimizer. _Expert Systems with Applications_, 191, 116158. [10.1016/j.eswa.2021.116158](https://doi.org/10.1016/j.eswa.2021.116158) 
 
+### SO : Snake Optimizer (2022, April)
+Hashim, F. A., & Hussien, A. G. (2022). Snake Optimizer: A novel meta-heuristic optimization algorithm. _Knowledge-Based Systems_, 242, 108320. [10.1016/j.knosys.2022.108320](https://doi.org/10.1016/j.knosys.2022.108320) 
+
 ### CO: Cheetah Optimizer (2022, June)
 Akbari, M. A., Zare, M., Azizipanah-Abarghooee, R., Mirjalili, S., & Deriche, M. (2022). The cheetah optimizer: A nature-inspired metaheuristic algorithm for large-scale optimization problems. _Scientific reports_, 12(1), 10953. [10.1038/s41598-022-14338-z](https://doi.org/10.1038/s41598-022-14338-z) 
