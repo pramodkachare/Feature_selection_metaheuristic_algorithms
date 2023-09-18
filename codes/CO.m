@@ -65,12 +65,14 @@ end
 %Start timer
 timer = tic();
 
-if length(LB) == 1
-    UB = UB.*ones(1,N_Var);   % Lower Bound of Decision Variables
-    LB = LB.*ones(1,N_Var);   % Upper Bound of Decision Variables
+%Initialize the positions of search agents
+if length(UB)==1    % If same limit is applied on all variables
+    UB = repmat(UB, 1, N_Var);
+end
+if length(LB)==1    % If same limit is applied on all variables
+    LB = repmat(LB, 1, N_Var);
 end
 
-% No_P = 6;                 % Population Size
 m = 2;                    % Number of search agenets in a group
         
 %% Generate initial population of cheetahs (Algorithm 1, L#2)
@@ -89,9 +91,9 @@ end
 
 %% Initialization (Algorithm 1, L#3)
 pop1 = pop;               % Population's initial home position
-BestCost = [];            % Leader fittnes value in a current hunting period
+conv_curve = zeros(1,Max_Iter);            % Leader fittnes value in a current hunting period
 X_best = BestSol;         % Prey solution sofar
-Globest = BestCost;       % Prey fittnes value sofar
+Globest = conv_curve;       % Prey fittnes value sofar
 
 %% Initial parameters
 tt = 0;                    % Hunting time counter (Algorithm 1, L#4)
@@ -100,7 +102,7 @@ it = 1;                   % Iteration counter(Algorithm 1, L#5)
 T = ceil(N_Var/10)*60;        % Hunting time (Algorithm 1, L#7)
 FEs = 0;                  % Counter for function evaluations (FEs)
 %% CO Main Loop
-while FEs <= Max_Iter % Algorithm 1, L#8
+while it <= Max_Iter % Algorithm 1, L#8
     %  m = 1+randi (ceil(n/2)); 
     i0 = randi(No_P,1,m);    % select a random member of cheetahs (Algorithm 1, L#9)
     for kk = 1 : m % Algorithm 1, L#10
@@ -117,9 +119,9 @@ while FEs <= Max_Iter % Algorithm 1, L#8
         Xb = BestSol.Position;  % The leader position
         Xbest = X_best.Position;% The pery position
 
-        kk=0;
+%         kk=0;
         % Uncomment the follwing statements, it may improve the performance of CO
-        if ii<=2 && tt>2 && tt>ceil(0.2*T+1) && abs(BestCost(tt-2)-BestCost(tt-ceil(0.2*T+1)))<=0.0001*Globest(tt-1)
+        if ii<=2 && tt>2 && tt>ceil(0.2*T+1) && abs(conv_curve(tt-2)-conv_curve(tt-ceil(0.2*T+1)))<=0.0001*Globest(tt-1)
             X = X_best.Position;
             kk = 0;
         elseif ii == 3
@@ -193,7 +195,7 @@ while FEs <= Max_Iter % Algorithm 1, L#8
 
     %% Leave the prey and go back home (Algorithm 1, L#29)
     if tt>T && tt-round(T)-1>=1 && tt>2
-        if  abs(BestCost(tt-1)-BestCost(tt-round(T)-1))<=abs(0.01*BestCost(tt-1))
+        if  abs(conv_curve(tt-1)-conv_curve(tt-round(T)-1))<=abs(0.01*conv_curve(tt-1))
 
             % Change the leader position (Algorithm 1, L#30)
             best = X_best.Position;
@@ -219,12 +221,12 @@ while FEs <= Max_Iter % Algorithm 1, L#8
     if BestSol.Cost<X_best.Cost
         X_best=BestSol;
     end
-    BestCost(tt)=BestSol.Cost;
+    conv_curve(tt)=BestSol.Cost;
     Globest(1,tt)=X_best.Cost;
 
     %% Display
-    if mod(it,500)==0
-    disp([' FEs>> ' num2str(FEs) '   BestCost = ' num2str(Globest(tt))]);
+    if mod(it, verbose) == 0  %Print best particle details at fixed iters
+        fprintf('CO: Iteration %d    fitness: %4.3f \n', it, Globest(end));
     end
 end
 Best_F = X_best; % Global best fitness
