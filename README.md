@@ -21,3 +21,6 @@ Hashim, F. A., & Hussien, A. G. (2022). Snake Optimizer: A novel meta-heuristic 
 
 ### CO: Cheetah Optimizer (2022, June)
 Akbari, M. A., Zare, M., Azizipanah-Abarghooee, R., Mirjalili, S., & Deriche, M. (2022). The cheetah optimizer: A nature-inspired metaheuristic algorithm for large-scale optimization problems. _Scientific reports_, 12(1), 10953. [10.1038/s41598-022-14338-z](https://doi.org/10.1038/s41598-022-14338-z) 
+
+### FLA : Fick's Law Algorithm (2023)
+Hashim, F. A., Mostafa, R. R., Hussien, A. G., Mirjalili, S., & Sallam, K. M. (2023). Fick’s Law Algorithm: A physical law-based algorithm for numerical optimization. Knowledge-Based Systems, 260, 110146. [10.1016/j.knosys.2022.110146] (https://doi.org/10.1016/j.knosys.2022.110146)
