@@ -1,28 +1,38 @@
-%_________________________________________________________________________%
-%  Fick's Law Algorithm (FLA) source codes version 1.0                    %
-%                                                                         %
-%  Developed in MATLAB R2021b                                             %
-%                                                                         %
-%  Coresponding Author:  Abdelazim G. Hussien                             %
-%                                                                         %
-%                                                                         %
-%         e-Mail: abdelazim.hussien@liu.se                                %
-%                 aga08@fayoum.edu.eg                                     %
-%                                                                         %
-%                                                                         %
-%   Main paper: Fatma Hashim, Reham R Mostafa, Abdelazim G. Hussien,      %
-%                     Seyedali Mirjalili, & Karam M. Sallam               %
-%               Knowledge-based Systems                                   %
-%                                                                         %
-%_________________________________________________________________________%
-function [BestF, Xss, CNVG] = FLA(NoMolecules, T, lb, ub, dim, objfunc, data, target)
+%FLA Fick's Law Algorithm (FLA)
+% [BestF, BestP, conv_curve, CT] = FLA(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+% 
+%   Main paper: Hashim, F. A., Mostafa, R. R., Hussien, A. G., Mirjalili, S.
+%               & Sallam, K. M. (2023). 
+%               Fick’s Law Algorithm: A physical law-based algorithm for 
+%               numerical optimization.  
+%               Knowledge-Based Systems, 260, 110146. 
+%               DOI: 10.1016/j.knosys.2022.110146
+
+% 
+%     [BestF, BestP] = PSO(data) applies feature selection on M-by-N matrix
+%     data with N examples and assuming last column as the classification target 
+%     and returns the best fitness value BestF and 1-by-(M-1) matrix of 
+%     feature positions BestP.
+%
+%     [BestF, BestP] = PSO(data, target) applies feature selection on M-by-N 
+%     feature matrix data and 1-by-N target matrix target and returns the 
+%     best fitness value BestF and 1-by-(M-1)matrix of feature positions BestP.
+%     
+%     Example:
+%
+%
+% Original Author: Abdelazim G. Hussien (abdelazim.hussien@liu.se,
+% aga08@fayoum.edu.eg)
+% Revised by : Pramod H. Kachare (Aug 2023)
+
+function [BestF, BestP, CNVG] = FLA(NoMolecules, T, lb, ub, dim, objfunc, data, target)
 C1=0.5;C2=2;c3=.1;c4=.2;c5=2;D=.01;
 X=bsxfun(@plus, lb, bsxfun(@times, rand(NoMolecules,dim), (ub-lb)));%intial postions
 for i=1:NoMolecules
     FS(i) = feval(objfunc,X(i,:), data, target);
 end
 [BestF, IndexBestF] = min(FS);
-Xss = X(IndexBestF,:);
+BestP = X(IndexBestF,:);
 n1=round(NoMolecules/2);
 n2=NoMolecules-n1;
 X1=X(1:n1,:);
@@ -151,23 +161,23 @@ for t = 1:T
             DFg=vec_flag(flag_index);
             Xm1=mean(X1);
             Xm=mean(X);
-            J=-D*(Xm-Xm1)/norm(Xss- X1(u,:)+eps);
+            J=-D*(Xm-Xm1)/norm(BestP- X1(u,:)+eps);
             DRF= exp(-J/TF(t));
             MS=exp(-FSss/(FS1(u)+eps));
             R1=rand(1,dim);
             Qg=DFg*DRF.*R1;
-            X1new(u,:)=  Xss+Qg.*X1(u,:)+Qg.*(MS*Xss-X1(u,:));
+            X1new(u,:)=  BestP+Qg.*X1(u,:)+Qg.*(MS*BestP-X1(u,:));
         end
         for u=1:n2
             Xm1=mean(X1);
             Xm=mean(X);
-            J=-D*(Xm1-Xm)/norm(Xss- X2(u,:)+eps);
+            J=-D*(Xm1-Xm)/norm(BestP- X2(u,:)+eps);
             DRF= exp(-J/TF(t));
             MS=exp(-FSss/(FS2(u)+eps));
             flag_index = floor(2*rand()+1);
             DFg=vec_flag(flag_index);
                         Qg=DFg*DRF.*R1;
-            X2new(u,:)= Xss+ Qg.*X2(u,:)+Qg.*(MS*Xss-X2(u,:));
+            X2new(u,:)= BestP+ Qg.*X2(u,:)+Qg.*(MS*BestP-X2(u,:));
         end
         end
     end
@@ -203,7 +213,7 @@ for t = 1:T
     CNVG(t)=FSss;
     if FSss<BestF
         BestF=FSss;
-        Xss =YSol;
+        BestP =YSol;
         
     end
     if mod(t,1)==0  %Print the best universe details after every t iterations
