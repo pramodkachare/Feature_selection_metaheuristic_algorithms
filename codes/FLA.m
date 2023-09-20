@@ -26,6 +26,43 @@
 % Revised by : Pramod H. Kachare (Aug 2023)
 
 function [BestF, BestP, conv_curve, CT] = FLA(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+if nargin < 1
+    error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
+end
+
+if nargin < 2  % If only data is given, assume last column as target
+    target = data(:, end);
+    data = data(:, 1:end-1);
+end
+
+if nargin < 3  % Default 10 search agents
+    No_P = 10;
+end
+
+if nargin < 4
+    fobj = str2func('split_fitness'); % Apply feature selection
+end
+
+if nargin < 5
+    N_Var = size(data, 2); % Apply feature selection on columns of X
+end
+
+if nargin < 6
+    Max_Iter = 100;     % Run optimization for max 100 iterations
+end
+
+if nargin < 8
+    UB = 1;     % Assume upper limit for each variable is 1
+end
+if nargin < 7
+    LB = 0;     % Assume lower limit for each variable is 0
+end
+
+if nargin < 9
+    verbose = 1; % Print progress after each iteration
+end
+%Start timer
+timer = tic();
 
 C1=0.5;C2=2;c3=.1;c4=.2;c5=2;D=.01;
 X=bsxfun(@plus, LB, bsxfun(@times, rand(No_P,N_Var), (UB-LB)));%intial postions
@@ -221,5 +258,6 @@ for t = 1:Max_Iter
         fprintf('FLA: Iteration %d    fitness: %4.3f \n', t, BestF);
     end  
 end
+CT = toc(timer);       % Total computation time in seconds
 
-end
+%% END OF FLA.m
