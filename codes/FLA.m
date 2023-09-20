@@ -79,7 +79,7 @@ X=bsxfun(@plus, LB, bsxfun(@times, rand(No_P,N_Var), (UB-LB)));
 
 FS = zeros(1, No_P);
 for ii=1:No_P
-    FS(ii) = feval(fobj,X(ii,:), data, target);
+    FS(ii) = fobj(X(ii,:) > (LB+UB)/2, data, target);
 end
 [BestF, IndexBestF] = min(FS);
 BestP = X(IndexBestF,:);
@@ -92,11 +92,11 @@ X2=X(n1+1:No_P,:);
 
 FS1 = zeros(1, No_P);
 for ii=1:n1
-    FS1(ii) = feval(fobj,X1(ii,:), data, target);
+    FS1(ii) = fobj(X1(ii,:) > (LB+UB)/2, data, target);
 end
 FS2 = zeros(1, No_P);
 for ii=1:n2
-    FS2(ii) = feval(fobj,X2(ii,:), data, target);
+    FS2(ii) = fobj(X2(ii,:) > (LB+UB)/2, data, target);
 end
 
 [FSeo1, IndexFSeo1] = min(FS1);
@@ -242,7 +242,7 @@ for tt = 1:Max_Iter
     end
     for j=1:n1
         FU=X1new(j,:)>UB;FL=X1new(j,:)<LB;X1new(j,:)=(X1new(j,:).*(~(FU+FL)))+UB.*FU+LB.*FL;
-        v = feval(fobj,X1new(j,:), data, target);
+        v = fobj(X1new(j,:) > (LB+UB)/2, data, target);
         if v<FS1(j)
             FS1(j)=v;
             X1(j,:)= X1new(j,:);
@@ -250,7 +250,7 @@ for tt = 1:Max_Iter
     end
     for j=1:n2
         FU=X2new(j,:)>UB;FL=X2new(j,:)<LB;X2new(j,:)=(X2new(j,:).*(~(FU+FL)))+UB.*FU+LB.*FL;
-        v = feval(fobj,X2new(j,:), data, target);
+        v = fobj(X2new(j,:) > (LB+UB)/2, data, target);
         if v<FS2(j)
             FS2(j)=v;
             X2(j,:)= X2new(j,:);
