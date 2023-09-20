@@ -77,20 +77,26 @@ end
 % Initialize postions
 X=bsxfun(@plus, LB, bsxfun(@times, rand(No_P,N_Var), (UB-LB)));
 
-for i=1:No_P
-    FS(i) = feval(fobj,X(i,:), data, target);
+FS = zeros(1, No_P);
+for ii=1:No_P
+    FS(ii) = feval(fobj,X(ii,:), data, target);
 end
 [BestF, IndexBestF] = min(FS);
 BestP = X(IndexBestF,:);
+
+% Divide population in two equal halfs
 n1=round(No_P/2);
 n2=No_P-n1;
 X1=X(1:n1,:);
 X2=X(n1+1:No_P,:);
-for i=1:n1
-    FS1(i) = feval(fobj,X1(i,:), data, target);
+
+FS1 = zeros(1, No_P);
+for ii=1:n1
+    FS1(ii) = feval(fobj,X1(ii,:), data, target);
 end
-for i=1:n2
-    FS2(i) = feval(fobj,X2(i,:), data, target);
+FS2 = zeros(1, No_P);
+for ii=1:n2
+    FS2(ii) = feval(fobj,X2(ii,:), data, target);
 end
 
 [FSeo1, IndexFSeo1] = min(FS1);
@@ -98,135 +104,139 @@ end
 Xeo1 = X1(IndexFSeo1,:);
 Xeo2 = X2(IndexFSeo2,:);
 vec_flag=[1,-1];
-  if FSeo1<FSeo2
-        FSss=FSeo1;
-        YSol=Xeo1;
-    else
-        FSss=FSeo2;
-        YSol=Xeo2;
-    end
-for t = 1:Max_Iter
-    TF(t)=sinh(t/Max_Iter)^C1;
-    X=[X1;X2];
+
+if FSeo1 < FSeo2
+    FSss = FSeo1;
+%     YSol = Xeo1;
+else
+    FSss = FSeo2;
+%     YSol = Xeo2;
+end
+
+TF = zeros(1, Max_Iter);
+conv_curve = zeros(1, Max_Iter);
+for tt = 1:Max_Iter
+    TF(tt)=sinh(tt/Max_Iter)^C1;
+    X=[X1; X2];
     %             DO
-    if TF(t)<0.9
-           DOF=exp(-(C2*TF(t)-rand))^C2;
-            TDO=c5*TF(t)-rand;%   direction of flow
-            if (TDO)<rand
-                %         select no of molecules
-                M1N = c3*n1;
-                M2N = c4*n1;
-                NT12 =round((M2N-M1N).*rand(1,1) + M1N);
-                for u=1:NT12
-                    flag_index = floor(2*rand()+1);
-                    DFg=vec_flag(flag_index);
-                    Xm2=mean(X2);
-                    Xm1=mean(X1);
-                    J=-D*(Xm2-Xm1)/norm(Xeo2- X1(u,:)+eps);
-                    X1new(u,:)= Xeo2+ DFg*DOF.*rand(1,N_Var).*(J.*Xeo2-X1(u,:));
-                end
-                for u=NT12+1:n1
-                    for tt=1:N_Var
-                        p=rand;
-                        if p<0.8
-                            X1new(u,tt) = Xeo1(tt);
-                        elseif p<.9
-                            r3=rand;
-                            X1new(u,tt)=X1(u,tt)+DOF.*((UB(1,tt)-LB(1,tt))*r3+LB(1,tt));
-                        else
-                            X1new(u,tt) =X1(u,tt);
-                        end
-                        
+    if TF(tt)<0.9
+        DOF=exp(-(C2*TF(tt)-rand))^C2;
+        TDO=c5*TF(tt)-rand;%   direction of flow
+        if (TDO)<rand
+%         select no of molecules
+            M1N = c3*n1;
+            M2N = c4*n1;
+            NT12 =round((M2N-M1N).*rand(1,1) + M1N);
+            X1new = zeros(NT12, N_Var);
+            for uu=1:NT12
+                flag_index = floor(2*rand()+1);
+                DFg=vec_flag(flag_index);
+                Xm2=mean(X2);
+                Xm1=mean(X1);
+                J=-D*(Xm2-Xm1)/norm(Xeo2- X1(uu,:)+eps);
+                X1new(uu,:)= Xeo2+ DFg*DOF.*rand(1,N_Var).*(J.*Xeo2-X1(uu,:));
+            end
+            for uu = NT12+1:n1
+                for jj = 1:N_Var
+                    p=rand;
+                    if p<0.8
+                        X1new(uu,jj) = Xeo1(jj);
+                    elseif p<.9
+                        r3=rand;
+                        X1new(uu,jj)=X1(uu,jj)+DOF.*((UB(1,jj)-LB(1,jj))*r3+LB(1,jj));
+                    else
+                        X1new(uu,jj) =X1(uu,jj);
                     end
-                end
-                for u=1:n2
-                    r4=rand;
-                    X2new(u,:)= Xeo2+DOF.*((UB-LB)*r4+LB);
-                end
-            else
-                M1N = .1*n2;
-                M2N = .2*n2;
-                Ntransfer =round((M2N-M1N).*rand(1,1) + M1N);
-                for u=1:Ntransfer
-                    flag_index = floor(2*rand()+1);
-                    DFg=vec_flag(flag_index);
-                    R1=randi(n1);
-                    Xm1=mean(X1);
-                    Xm2=mean(X2);
-                    J=-D*(Xm1-Xm2)/norm(Xeo1- X2(u,:)+eps);
-                    X2new(u,:)=  Xeo1+DFg*DOF.*rand(1,N_Var).*(J.*Xeo1-1*X2(u,:));
-                end
-                for u=Ntransfer+1:n2
-                    for tt=1:N_Var
-                        p=rand;
-                        if p<0.8
-                            X2new(u,tt) = Xeo2(tt);
-                        elseif p<.9
-                            r3=rand;
-                            X2new(u,tt)=X2(u,tt)+DOF.*((UB(1,tt)-LB(1,tt))*r3+LB(1,tt));
-                        else
-                            X2new(u,tt) =X2(u,tt);
-                        end
-                        
-                    end
-                end
-                for u=1:n1
-                    r4=rand;
-                    X1new(u,:)= Xeo1+DOF.*((UB-LB)*r4+LB);
                 end
             end
- 
+            X2new = zeros(n2, N_Var);
+            for uu=1:n2
+                r4=rand;
+                X2new(uu,:)= Xeo2+DOF.*((UB-LB)*r4+LB);
+            end
+        else
+            M1N = .1*n2;
+            M2N = .2*n2;
+            Ntransfer =round((M2N-M1N).*rand(1,1) + M1N);
+            for uu=1:Ntransfer
+                flag_index = floor(2*rand()+1);
+                DFg=vec_flag(flag_index);
+                R1=randi(n1);
+                Xm1=mean(X1);
+                Xm2=mean(X2);
+                J=-D*(Xm1-Xm2)/norm(Xeo1- X2(uu,:)+eps);
+                X2new(uu,:)=  Xeo1+DFg*DOF.*rand(1,N_Var).*(J.*Xeo1-1*X2(uu,:));
+            end
+            for uu=Ntransfer+1:n2
+                for jj=1:N_Var
+                    p=rand;
+                    if p<0.8
+                        X2new(uu,jj) = Xeo2(jj);
+                    elseif p<.9
+                        r3=rand;
+                        X2new(uu,jj)=X2(uu,jj)+DOF.*((UB(1,jj)-LB(1,jj))*r3+LB(1,jj));
+                    else
+                        X2new(uu,jj) =X2(uu,jj);
+                    end
+
+                end
+            end
+            for uu=1:n1
+                r4=rand;
+                X1new(uu,:)= Xeo1+DOF.*((UB-LB)*r4+LB);
+            end
+        end
     else
 %         Equilibrium operator (EO)
-        if TF(t)<=1
-            for u=1:n1
+        if TF(tt)<=1
+            for uu=1:n1
                 flag_index = floor(2*rand()+1);
                 DFg=vec_flag(flag_index);
                 Xm1=mean(X1);
                 Xmeo1=Xeo1;
-                J=-D*(Xmeo1-Xm1)/norm(Xeo1- X1(u,:)+eps);
-                DRF= exp(-J/TF(t));
-                MS=exp(-FSeo1/(FS1(u)+eps));
+                J=-D*(Xmeo1-Xm1)/norm(Xeo1- X1(uu,:)+eps);
+                DRF= exp(-J/TF(tt));
+                MS=exp(-FSeo1/(FS1(uu)+eps));
                 R1=rand(1,N_Var);
                 Qeo=DFg*DRF.*R1;
-                X1new(u,:)= Xeo1+Qeo.*X1(u,:)+Qeo.*(MS*Xeo1-X1(u,:));
+                X1new(uu,:)= Xeo1+Qeo.*X1(uu,:)+Qeo.*(MS*Xeo1-X1(uu,:));
             end
-            for u=1:n2
+            for uu=1:n2
                 flag_index = floor(2*rand()+1);
                 DFg=vec_flag(flag_index);
                 Xm2=mean(X2);
                 Xmeo2=Xeo2;
-                J=-D*(Xmeo2-Xm2)/norm(Xeo2- X2(u,:)+eps);
-                DRF= exp(-J/TF(t));
-                MS=exp(-FSeo2/(FS2(u)+eps));
+                J=-D*(Xmeo2-Xm2)/norm(Xeo2- X2(uu,:)+eps);
+                DRF= exp(-J/TF(tt));
+                MS=exp(-FSeo2/(FS2(uu)+eps));
                 R1=rand(1,N_Var);
                 Qeo=DFg*DRF.*R1;
-                X2new(u,:)=  Xeo2+Qeo.*X2(u,:)+Qeo.*(MS*Xeo1-X2(u,:));
+                X2new(uu,:)=  Xeo2+Qeo.*X2(uu,:)+Qeo.*(MS*Xeo1-X2(uu,:));
             end
         else
             %     Steady state operator (SSO):
-                for u=1:n1
+        for uu=1:n1
             flag_index = floor(2*rand()+1);
             DFg=vec_flag(flag_index);
             Xm1=mean(X1);
             Xm=mean(X);
-            J=-D*(Xm-Xm1)/norm(BestP- X1(u,:)+eps);
-            DRF= exp(-J/TF(t));
-            MS=exp(-FSss/(FS1(u)+eps));
+            J=-D*(Xm-Xm1)/norm(BestP- X1(uu,:)+eps);
+            DRF= exp(-J/TF(tt));
+            MS=exp(-FSss/(FS1(uu)+eps));
             R1=rand(1,N_Var);
             Qg=DFg*DRF.*R1;
-            X1new(u,:)=  BestP+Qg.*X1(u,:)+Qg.*(MS*BestP-X1(u,:));
+            X1new(uu,:)=  BestP+Qg.*X1(uu,:)+Qg.*(MS*BestP-X1(uu,:));
         end
-        for u=1:n2
+        for uu=1:n2
             Xm1=mean(X1);
             Xm=mean(X);
-            J=-D*(Xm1-Xm)/norm(BestP- X2(u,:)+eps);
-            DRF= exp(-J/TF(t));
-            MS=exp(-FSss/(FS2(u)+eps));
+            J=-D*(Xm1-Xm)/norm(BestP- X2(uu,:)+eps);
+            DRF= exp(-J/TF(tt));
+            MS=exp(-FSss/(FS2(uu)+eps));
             flag_index = floor(2*rand()+1);
             DFg=vec_flag(flag_index);
                         Qg=DFg*DRF.*R1;
-            X2new(u,:)= BestP+ Qg.*X2(u,:)+Qg.*(MS*BestP-X2(u,:));
+            X2new(uu,:)= BestP+ Qg.*X2(uu,:)+Qg.*(MS*BestP-X2(uu,:));
         end
         end
     end
@@ -259,14 +269,14 @@ for t = 1:Max_Iter
         FSss=FSeo2;
         YSol=Xeo2;
     end
-    conv_curve(t)=FSss;
+    conv_curve(tt)=FSss;
     if FSss<BestF
         BestF=FSss;
         BestP =YSol;
         
     end
-    if mod(t,1)==0  %Print the best universe details after every t iterations
-        fprintf('FLA: Iteration %d    fitness: %4.3f \n', t, BestF);
+    if mod(tt,1)==0  %Print the best universe details after every t iterations
+        fprintf('FLA: Iteration %d    fitness: %4.3f \n', tt, BestF);
     end  
 end
 CT = toc(timer);       % Total computation time in seconds
