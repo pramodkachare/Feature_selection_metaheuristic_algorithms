@@ -23,7 +23,7 @@
 %
 % Original Author: Abdelazim G. Hussien (abdelazim.hussien@liu.se,
 % aga08@fayoum.edu.eg)
-% Revised by : Pramod H. Kachare (Aug 2023)
+% Revised by : Pramod H. Kachare (Sep 2023)
 
 function [BestF, BestP, conv_curve, CT] = FLA(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 if nargin < 1
