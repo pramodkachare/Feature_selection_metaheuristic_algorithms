@@ -64,8 +64,19 @@ end
 %Start timer
 timer = tic();
 
-C1=0.5;C2=2;c3=.1;c4=.2;c5=2;D=.01;
-X=bsxfun(@plus, LB, bsxfun(@times, rand(No_P,N_Var), (UB-LB)));%intial postions
+% Hyper-parameters
+C1=0.5;     C2=2;       c3=.1;      c4=.2;      c5=2;       D=.01;
+
+if length(UB)==1    % If same limit is applied on all variables
+    UB = repmat(UB, 1, N_Var);
+end
+if length(LB)==1    % If same limit is applied on all variables
+    LB = repmat(LB, 1, N_Var);
+end
+
+% Initialize postions
+X=bsxfun(@plus, LB, bsxfun(@times, rand(No_P,N_Var), (UB-LB)));
+
 for i=1:No_P
     FS(i) = feval(fobj,X(i,:), data, target);
 end
