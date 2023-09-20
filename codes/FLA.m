@@ -25,23 +25,24 @@
 % aga08@fayoum.edu.eg)
 % Revised by : Pramod H. Kachare (Aug 2023)
 
-function [BestF, BestP, CNVG] = FLA(NoMolecules, T, lb, ub, dim, objfunc, data, target)
+function [BestF, BestP, conv_curve, CT] = FLA(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+
 C1=0.5;C2=2;c3=.1;c4=.2;c5=2;D=.01;
-X=bsxfun(@plus, lb, bsxfun(@times, rand(NoMolecules,dim), (ub-lb)));%intial postions
-for i=1:NoMolecules
-    FS(i) = feval(objfunc,X(i,:), data, target);
+X=bsxfun(@plus, LB, bsxfun(@times, rand(No_P,N_Var), (UB-LB)));%intial postions
+for i=1:No_P
+    FS(i) = feval(fobj,X(i,:), data, target);
 end
 [BestF, IndexBestF] = min(FS);
 BestP = X(IndexBestF,:);
-n1=round(NoMolecules/2);
-n2=NoMolecules-n1;
+n1=round(No_P/2);
+n2=No_P-n1;
 X1=X(1:n1,:);
-X2=X(n1+1:NoMolecules,:);
+X2=X(n1+1:No_P,:);
 for i=1:n1
-    FS1(i) = feval(objfunc,X1(i,:), data, target);
+    FS1(i) = feval(fobj,X1(i,:), data, target);
 end
 for i=1:n2
-    FS2(i) = feval(objfunc,X2(i,:), data, target);
+    FS2(i) = feval(fobj,X2(i,:), data, target);
 end
 
 [FSeo1, IndexFSeo1] = min(FS1);
@@ -56,8 +57,8 @@ vec_flag=[1,-1];
         FSss=FSeo2;
         YSol=Xeo2;
     end
-for t = 1:T
-    TF(t)=sinh(t/T)^C1;
+for t = 1:Max_Iter
+    TF(t)=sinh(t/Max_Iter)^C1;
     X=[X1;X2];
     %             DO
     if TF(t)<0.9
@@ -74,16 +75,16 @@ for t = 1:T
                     Xm2=mean(X2);
                     Xm1=mean(X1);
                     J=-D*(Xm2-Xm1)/norm(Xeo2- X1(u,:)+eps);
-                    X1new(u,:)= Xeo2+ DFg*DOF.*rand(1,dim).*(J.*Xeo2-X1(u,:));
+                    X1new(u,:)= Xeo2+ DFg*DOF.*rand(1,N_Var).*(J.*Xeo2-X1(u,:));
                 end
                 for u=NT12+1:n1
-                    for tt=1:dim
+                    for tt=1:N_Var
                         p=rand;
                         if p<0.8
                             X1new(u,tt) = Xeo1(tt);
                         elseif p<.9
                             r3=rand;
-                            X1new(u,tt)=X1(u,tt)+DOF.*((ub(1,tt)-lb(1,tt))*r3+lb(1,tt));
+                            X1new(u,tt)=X1(u,tt)+DOF.*((UB(1,tt)-LB(1,tt))*r3+LB(1,tt));
                         else
                             X1new(u,tt) =X1(u,tt);
                         end
@@ -92,7 +93,7 @@ for t = 1:T
                 end
                 for u=1:n2
                     r4=rand;
-                    X2new(u,:)= Xeo2+DOF.*((ub-lb)*r4+lb);
+                    X2new(u,:)= Xeo2+DOF.*((UB-LB)*r4+LB);
                 end
             else
                 M1N = .1*n2;
@@ -105,16 +106,16 @@ for t = 1:T
                     Xm1=mean(X1);
                     Xm2=mean(X2);
                     J=-D*(Xm1-Xm2)/norm(Xeo1- X2(u,:)+eps);
-                    X2new(u,:)=  Xeo1+DFg*DOF.*rand(1,dim).*(J.*Xeo1-1*X2(u,:));
+                    X2new(u,:)=  Xeo1+DFg*DOF.*rand(1,N_Var).*(J.*Xeo1-1*X2(u,:));
                 end
                 for u=Ntransfer+1:n2
-                    for tt=1:dim
+                    for tt=1:N_Var
                         p=rand;
                         if p<0.8
                             X2new(u,tt) = Xeo2(tt);
                         elseif p<.9
                             r3=rand;
-                            X2new(u,tt)=X2(u,tt)+DOF.*((ub(1,tt)-lb(1,tt))*r3+lb(1,tt));
+                            X2new(u,tt)=X2(u,tt)+DOF.*((UB(1,tt)-LB(1,tt))*r3+LB(1,tt));
                         else
                             X2new(u,tt) =X2(u,tt);
                         end
@@ -123,7 +124,7 @@ for t = 1:T
                 end
                 for u=1:n1
                     r4=rand;
-                    X1new(u,:)= Xeo1+DOF.*((ub-lb)*r4+lb);
+                    X1new(u,:)= Xeo1+DOF.*((UB-LB)*r4+LB);
                 end
             end
  
@@ -138,7 +139,7 @@ for t = 1:T
                 J=-D*(Xmeo1-Xm1)/norm(Xeo1- X1(u,:)+eps);
                 DRF= exp(-J/TF(t));
                 MS=exp(-FSeo1/(FS1(u)+eps));
-                R1=rand(1,dim);
+                R1=rand(1,N_Var);
                 Qeo=DFg*DRF.*R1;
                 X1new(u,:)= Xeo1+Qeo.*X1(u,:)+Qeo.*(MS*Xeo1-X1(u,:));
             end
@@ -150,7 +151,7 @@ for t = 1:T
                 J=-D*(Xmeo2-Xm2)/norm(Xeo2- X2(u,:)+eps);
                 DRF= exp(-J/TF(t));
                 MS=exp(-FSeo2/(FS2(u)+eps));
-                R1=rand(1,dim);
+                R1=rand(1,N_Var);
                 Qeo=DFg*DRF.*R1;
                 X2new(u,:)=  Xeo2+Qeo.*X2(u,:)+Qeo.*(MS*Xeo1-X2(u,:));
             end
@@ -164,7 +165,7 @@ for t = 1:T
             J=-D*(Xm-Xm1)/norm(BestP- X1(u,:)+eps);
             DRF= exp(-J/TF(t));
             MS=exp(-FSss/(FS1(u)+eps));
-            R1=rand(1,dim);
+            R1=rand(1,N_Var);
             Qg=DFg*DRF.*R1;
             X1new(u,:)=  BestP+Qg.*X1(u,:)+Qg.*(MS*BestP-X1(u,:));
         end
@@ -182,16 +183,16 @@ for t = 1:T
         end
     end
     for j=1:n1
-        FU=X1new(j,:)>ub;FL=X1new(j,:)<lb;X1new(j,:)=(X1new(j,:).*(~(FU+FL)))+ub.*FU+lb.*FL;
-        v = feval(objfunc,X1new(j,:), data, target);
+        FU=X1new(j,:)>UB;FL=X1new(j,:)<LB;X1new(j,:)=(X1new(j,:).*(~(FU+FL)))+UB.*FU+LB.*FL;
+        v = feval(fobj,X1new(j,:), data, target);
         if v<FS1(j)
             FS1(j)=v;
             X1(j,:)= X1new(j,:);
         end
     end
     for j=1:n2
-        FU=X2new(j,:)>ub;FL=X2new(j,:)<lb;X2new(j,:)=(X2new(j,:).*(~(FU+FL)))+ub.*FU+lb.*FL;
-        v = feval(objfunc,X2new(j,:), data, target);
+        FU=X2new(j,:)>UB;FL=X2new(j,:)<LB;X2new(j,:)=(X2new(j,:).*(~(FU+FL)))+UB.*FU+LB.*FL;
+        v = feval(fobj,X2new(j,:), data, target);
         if v<FS2(j)
             FS2(j)=v;
             X2(j,:)= X2new(j,:);
@@ -210,7 +211,7 @@ for t = 1:T
         FSss=FSeo2;
         YSol=Xeo2;
     end
-    CNVG(t)=FSss;
+    conv_curve(t)=FSss;
     if FSss<BestF
         BestF=FSss;
         BestP =YSol;
