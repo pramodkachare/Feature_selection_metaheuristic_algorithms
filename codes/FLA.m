@@ -269,13 +269,15 @@ for tt = 1:Max_Iter
         FSss=FSeo2;
         YSol=Xeo2;
     end
+    
     conv_curve(tt)=FSss;
     if FSss<BestF
         BestF=FSss;
         BestP =YSol;
         
     end
-    if mod(tt,1)==0  %Print the best universe details after every t iterations
+
+    if mod(tt, verbose) == 0  %Print best particle details at fixed iters
         fprintf('FLA: Iteration %d    fitness: %4.3f \n', tt, BestF);
     end  
 end
