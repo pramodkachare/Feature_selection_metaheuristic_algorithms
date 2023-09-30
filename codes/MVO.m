@@ -108,7 +108,7 @@ while tt<Max_Iter+1
         Universes(ii,:)=(Universes(ii,:).*(~(Flag4ub+Flag4lb)))+UB.*Flag4ub+LB.*Flag4lb;
         
         %Calculate the inflation rate (fitness) of universes
-        Inflation_rates(1,ii)=fobj(Universes(ii,:), data, target);
+        Inflation_rates(1,ii)=fobj(Universes(ii,:) > (LB+UB)/2, data, target);
         
         %Elitism
         if Inflation_rates(1,ii)<Best_uni_Inf_rate
