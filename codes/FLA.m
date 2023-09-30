@@ -282,6 +282,6 @@ for tt = 1:Max_Iter
     end  
 end
 CT = toc(timer);       % Total computation time in seconds
-fprintf('MVO: Final fitness: %4.3f \n', BestF);
+fprintf('FLA: Final fitness: %4.3f \n', BestF);
 
 %% END OF FLA.m
