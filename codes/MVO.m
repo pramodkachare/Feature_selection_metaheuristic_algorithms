@@ -1,66 +1,56 @@
-%_______________________________________________________________________________________%
-%  Multi-Verse Optimizer (MVO) source codes demo version 1.0                            %
-%                                                                                       %
-%  Developed in MATLAB R2011b(7.13)                                                     %
-%                                                                                       %
-%  Author and programmer: Seyedali Mirjalili                                            %
-%                                                                                       %
-%         e-Mail: ali.mirjalili@gmail.com                                               %
-%                 seyedali.mirjalili@griffithuni.edu.au                                 %
-%                                                                                       %
-%       Homepage: http://www.alimirjalili.com                                           %
-%                                                                                       %
-%   Main paper:                                                                         %
-%                                                                                       %
-%   S. Mirjalili, S. M. Mirjalili, A. Hatamlou                                          %
-%   Multi-Verse Optimizer: a nature-inspired algorithm for global optimization          %
-%   Neural Computing and Applications, in press,2015,                                   %
-%   DOI: http://dx.doi.org/10.1007/s00521-015-1870-7                                    %
-%                                                                                       %
-%_______________________________________________________________________________________%
+%MVO Multi-Verse Optimizer (MVO)
+% [Best_uni_Inf_rate,Best_uni,conv_curve, CT] = MVO(data, target, No_P, fobj,
+%                                       N_Var, Max_Iter, LB, UB, verbose)
+% 
+%   Main paper: S. Mirjalili, S. M. Mirjalili, A. Hatamlou (2016). 
+%               Multi-Verse Optimizer: a nature-inspired algorithm for 
+%               global optimization. 
+%               Neural Computing and Applications, 27, 495–513. 
+%               DOI: 10.1007/s00521-015-1870-7
+% 
+%     [Best_uni_Inf_rate,Best_uni] = MVO(data) applies feature selection on 
+%     M-by-N matrix data with N examples and assuming last column as the 
+%     classification target and returns the best fitness value Best_uni_Inf_rate 
+%     and 1-by-(M-1) matrix of feature positions Best_uni.
+%
+%     [Best_uni_Inf_rate,Best_uni] = MVO(data, target) applies feature 
+%     selection on M-by-N feature matrix data and 1-by-N target matrix target 
+%     and returns the best fitness value Best_uni_Inf_rate and 1-by-(M-1) 
+%     matrix of feature positions Best_uni.
+%     
+%     Example:
+%
+%
+% Original Author: Dr. Seyedali Mirjalili
+% Revised by : Pramod H. Kachare (Sep 2023)
 
-% You can simply define your cost in a seperate file and load its handle to fobj
-% The initial parameters that you need are:
-%__________________________________________
-% fobj = @YourCostFunction
-% dim = number of your variables
-% Max_iteration = maximum number of generations
-% SearchAgents_no = number of search agents
-% lb=[lb1,lb2,...,lbn] where lbn is the lower bound of variable n
-% ub=[ub1,ub2,...,ubn] where ubn is the upper bound of variable n
-% If all the variables have equal lower bound you can just
-% define lb and ub as two single number numbers
-
-% To run MVO: [Best_score,Best_pos,cg_curve]=MVO(Universes_no,Max_iteration,lb,ub,dim,fobj)
-%__________________________________________
-
-function [Best_universe_Inflation_rate,Best_universe,Convergence_curve]=MVO(N,Max_time,lb,ub,dim,fobj, data, target)
+function [Best_uni_Inf_rate,Best_uni,conv_curve, CT] = MVO(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
 
 %Two variables for saving the position and inflation rate (fitness) of the best universe
-Best_universe=zeros(1,dim);
-Best_universe_Inflation_rate=inf;
+Best_uni=zeros(1,N_Var);
+Best_uni_Inf_rate=inf;
 
 %Initialize the positions of universes
-Universes=initialization(N,dim,ub,lb);
+Universes=initialization(No_P,N_Var,UB,LB);
 
 %Minimum and maximum of Wormhole Existence Probability (min and max in
 % Eq.(3.3) in the paper
 WEP_Max=1;
 WEP_Min=0.2;
 
-Convergence_curve=zeros(1,Max_time);
+conv_curve=zeros(1,Max_Iter);
 
 %Iteration(time) counter
 Time=1;
 
 %Main loop
-while Time<Max_time+1
+while Time<Max_Iter+1
     
     %Eq. (3.3) in the paper
-    WEP=WEP_Min+Time*((WEP_Max-WEP_Min)/Max_time);
+    WEP=WEP_Min+Time*((WEP_Max-WEP_Min)/Max_Iter);
     
     %Travelling Distance Rate (Formula): Eq. (3.4) in the paper
-    TDR=1-((Time)^(1/6)/(Max_time)^(1/6));
+    TDR=1-((Time)^(1/6)/(Max_Iter)^(1/6));
     
     %Inflation rates (I) (fitness values)
     Inflation_rates=zeros(1,size(Universes,1));
@@ -69,24 +59,24 @@ while Time<Max_time+1
         
         %Boundary checking (to bring back the universes inside search
         % space if they go beyoud the boundaries
-        Flag4ub=Universes(i,:)>ub;
-        Flag4lb=Universes(i,:)<lb;
-        Universes(i,:)=(Universes(i,:).*(~(Flag4ub+Flag4lb)))+ub.*Flag4ub+lb.*Flag4lb;
+        Flag4ub=Universes(i,:)>UB;
+        Flag4lb=Universes(i,:)<LB;
+        Universes(i,:)=(Universes(i,:).*(~(Flag4ub+Flag4lb)))+UB.*Flag4ub+LB.*Flag4lb;
         
         %Calculate the inflation rate (fitness) of universes
         Inflation_rates(1,i)=fobj(Universes(i,:), data, target);
         
         %Elitism
-        if Inflation_rates(1,i)<Best_universe_Inflation_rate
-            Best_universe_Inflation_rate=Inflation_rates(1,i);
-            Best_universe=Universes(i,:);
+        if Inflation_rates(1,i)<Best_uni_Inf_rate
+            Best_uni_Inf_rate=Inflation_rates(1,i);
+            Best_uni=Universes(i,:);
         end
         
     end
     
     [sorted_Inflation_rates,sorted_indexes]=sort(Inflation_rates);
     
-    for newindex=1:N
+    for newindex=1:No_P
         Sorted_universes(newindex,:)=Universes(sorted_indexes(newindex),:);
     end
     
@@ -109,31 +99,31 @@ while Time<Max_time+1
                 Universes(Back_hole_index,j)=Sorted_universes(White_hole_index,j);
             end
             
-            if (size(lb,2)==1)
+            if (size(LB,2)==1)
                 %Eq. (3.2) in the paper if the boundaries are all the same
                 r2=rand();
                 if r2<WEP
                     r3=rand();
                     if r3<0.5
-                        Universes(i,j)=Best_universe(1,j)+TDR*((ub-lb)*rand+lb);
+                        Universes(i,j)=Best_uni(1,j)+TDR*((UB-LB)*rand+LB);
                     end
                     if r3>0.5
-                        Universes(i,j)=Best_universe(1,j)-TDR*((ub-lb)*rand+lb);
+                        Universes(i,j)=Best_uni(1,j)-TDR*((UB-LB)*rand+LB);
                     end
                 end
             end
             
-            if (size(lb,2)~=1)
+            if (size(LB,2)~=1)
                 %Eq. (3.2) in the paper if the upper and lower bounds are
                 %different for each variables
                 r2=rand();
                 if r2<WEP
                     r3=rand();
                     if r3<0.5
-                        Universes(i,j)=Best_universe(1,j)+TDR*((ub(j)-lb(j))*rand+lb(j));
+                        Universes(i,j)=Best_uni(1,j)+TDR*((UB(j)-LB(j))*rand+LB(j));
                     end
                     if r3>0.5
-                        Universes(i,j)=Best_universe(1,j)-TDR*((ub(j)-lb(j))*rand+lb(j));
+                        Universes(i,j)=Best_uni(1,j)-TDR*((UB(j)-LB(j))*rand+LB(j));
                     end
                 end
             end
@@ -142,15 +132,15 @@ while Time<Max_time+1
     end
     
     %Update the convergence curve
-    Convergence_curve(Time)=Best_universe_Inflation_rate;
+    conv_curve(Time)=Best_uni_Inf_rate;
     
     %Print the best universe details after every 50 iterations
     if mod(Time,1)==0
-        fprintf('MVO: Iteration %d    fitness: %4.3f \n', Time, Best_universe_Inflation_rate);
+        fprintf('MVO: Iteration %d    fitness: %4.3f \n', Time, Best_uni_Inf_rate);
     end
     Time=Time+1;
 end
-fprintf('MVO: Final fitness: %4.3f \n', Best_universe_Inflation_rate);
+fprintf('MVO: Final fitness: %4.3f \n', Best_uni_Inf_rate);
 
 
 
