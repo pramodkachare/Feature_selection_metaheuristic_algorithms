@@ -25,6 +25,43 @@
 % Revised by : Pramod H. Kachare (Sep 2023)
 
 function [Best_uni_Inf_rate,Best_uni,conv_curve, CT] = MVO(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+if nargin < 1
+    error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
+end
+
+if nargin < 2  % If only data is given, assume last column as target
+    target = data(:, end);
+    data = data(:, 1:end-1);
+end
+
+if nargin < 3  % Default 10 search agents
+    No_P = 10;
+end
+
+if nargin < 4
+    fobj = str2func('split_fitness'); % Apply feature selection
+end
+
+if nargin < 5
+    N_Var = size(data, 2); % Apply feature selection on columns of X
+end
+
+if nargin < 6
+    Max_Iter = 100;     % Run optimization for max 100 iterations
+end
+
+if nargin < 8
+    UB = 1;     % Assume upper limit for each variable is 1
+end
+if nargin < 7
+    LB = 0;     % Assume lower limit for each variable is 0
+end
+
+if nargin < 9
+    verbose = 1; % Print progress after each iteration
+end
+%Start timer
+timer = tic();
 
 %Two variables for saving the position and inflation rate (fitness) of the best universe
 Best_uni=zeros(1,N_Var);
@@ -135,38 +172,18 @@ while Time<Max_Iter+1
     conv_curve(Time)=Best_uni_Inf_rate;
     
     %Print the best universe details after every 50 iterations
-    if mod(Time,1)==0
+    if mod(tt, verbose) == 0  %Print best particle details at fixed iters
         fprintf('MVO: Iteration %d    fitness: %4.3f \n', Time, Best_uni_Inf_rate);
     end
     Time=Time+1;
 end
+CT = toc(timer);       % Total computation time in seconds
 fprintf('MVO: Final fitness: %4.3f \n', Best_uni_Inf_rate);
 
 
 
 % Please note that these codes have been taken from:
 %http://playmedusa.com/blog/roulette-wheel-selection-algorithm-in-matlab-2/
-
-%_______________________________________________________________________________________%
-%  Multi-Verse Optimizer (MVO) source codes demo version 1.0                            %
-%                                                                                       %
-%  Developed in MATLAB R2011b(7.13)                                                     %
-%                                                                                       %
-%  Author and programmer: Seyedali Mirjalili                                            %
-%                                                                                       %
-%         e-Mail: ali.mirjalili@gmail.com                                               %
-%                 seyedali.mirjalili@griffithuni.edu.au                                 %
-%                                                                                       %
-%       Homepage: http://www.alimirjalili.com                                           %
-%                                                                                       %
-%   Main paper:                                                                         %
-%                                                                                       %
-%   S. Mirjalili, S. M. Mirjalili, A. Hatamlou                                          %
-%   Multi-Verse Optimizer: a nature-inspired algorithm for global optimization          % 
-%   Neural Computing and Applications, in press,2015,                                   %
-%   DOI: http://dx.doi.org/10.1007/s00521-015-1870-7                                    %
-%                                                                                       %
-%_______________________________________________________________________________________%
 
 % ---------------------------------------------------------
 % Roulette Wheel Selection Algorithm. A set of weights
