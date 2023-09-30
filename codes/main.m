@@ -8,16 +8,25 @@
 %     separately in each filename.
 %     
 %     algos = 1-by-N cell array of NIA names. Available NIAs are:
-%     PSO: Particle Swar Optimization (1995)
-%     GWO: Grey Wolf Optimizer (2011)
-%     SSA: Salp Swarm Algorithm (2016)
-%     RSA: Reptile Search Algorithm (2021)
-%     SO: Snake Optimizer (2022)
+%     PSO : Particle Swarm Optimization (1995)
+%     GWO : Grey Wolf Optimization (2014)
+%     MVO: Multi-Verse Optimizer (2016, February)
+%     WOA: Whale Optimization Algorithm (2016, May)
+%     SSA : Salp Swarm Algorithm (2017)
+%     SMA: Slime Mould Algorithm (2020)
+%     AOA: Arithmetic Optimization Algorithm (2021, April)
+%     AO: Aquila Optimizer (2021, July)
+%     ROA : Remora Optimization Algorithm (2021, December)
+%     DMOA: Dwarf Mongoose Optimization Algorithm (2022, March)
+%     RSA : Reptile Search Algorithm (2022, April)
+%     SO : Snake Optimizer (2022, April)
+%     CO: Cheetah Optimizer (2022, June)
+%     FLA : Fick's Law Algorithm (2023)
 %
 %     Example:
 %  
-% Author: Pramod H. Kachare (Aug 2023)
-% Last revised: 21/08/2023
+% Author: Pramod H. Kachare
+% Last revised: 30/09/2023
 
 %%
 close all
