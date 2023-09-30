@@ -1,122 +1,154 @@
-% Source codes demo version 1.0
-% ------------------------------------------------------------------------------------------------------------
-% Main paper (Please refer to the main paper):
-% Slime Mould Algorithm: A New Method for Stochastic Optimization
-% Shimin Li, Huiling Chen, Mingjing Wang, Ali Asghar Heidari, Seyedali Mirjalili
-% Future Generation Computer Systems,2020
-% DOI: https://doi.org/10.1016/j.future.2020.03.055
-% https://www.sciencedirect.com/science/article/pii/S0167739X19320941
-% ------------------------------------------------------------------------------------------------------------
-% Website of SMA: http://www.alimirjalili.com/SMA.html
-% You can find and run the SMA code online at http://www.alimirjalili.com/SMA.html
-
-% You can find the SMA paper at https://doi.org/10.1016/j.future.2020.03.055
-% Please follow the paper for related updates in researchgate: https://www.researchgate.net/publication/340431861_Slime_mould_algorithm_A_new_method_for_stochastic_optimization
-% ------------------------------------------------------------------------------------------------------------
-%  Main idea: Shimin Li
-%  Author and programmer: Shimin Li,Ali Asghar Heidari,Huiling Chen
-%  e-Mail: simonlishimin@foxmail.com
-% ------------------------------------------------------------------------------------------------------------
-%  Co-author:
-%             Huiling Chen(chenhuiling.jlu@gmail.com)
-%             Mingjing Wang(wangmingjing.style@gmail.com)
-%             Ali Asghar Heidari(aliasghar68@gmail.com, as_heidari@ut.ac.ir)
-%             Seyedali Mirjalili(ali.mirjalili@gmail.com)
-%             
-%             Researchgate: Ali Asghar Heidari https://www.researchgate.net/profile/Ali_Asghar_Heidari
-%             Researchgate: Seyedali Mirjalili https://www.researchgate.net/profile/Seyedali_Mirjalili
-%             Researchgate: Huiling Chen https://www.researchgate.net/profile/Huiling_Chen
-% ------------------------------------------------------------------------------------------------------------
-% _____________________________________________________
-%  Co-author and Advisor: Seyedali Mirjalili
+%SMA Slime Mould Algorithm
+% [dest_fit,best_pos,conv_curve, CT] = SMA(data, target, No_P, fobj, 
+%                                        N_Var, Max_Iter, LB, UB, verbose)
+% 
+%   Main paper: Li, S., Chen, H., Wang, M., Heidari, A. A., 
+%               & Mirjalili, S. (2020). 
+%               Slime mould algorithm: A new method for stochastic optimization.  
+%               Future Generation Computer Systems, 111, 300-323.
+%               DOI: 10.1016/j.future.2020.03.055
+% 
+%     [dest_fit,best_pos] = WOA(data) applies feature selection on 
+%     M-by-N matrix data with N examples and assuming last column as the 
+%     classification target and returns the best fitness value dest_fit 
+%     and 1-by-(M-1) matrix of feature positions best_pos.
 %
-%         e-Mail: ali.mirjalili@gmail.com
+%     [dest_fit,best_pos] = WOA(data, target) applies feature selection 
+%     on M-by-N feature matrix data and 1-by-N target matrix target and 
+%     returns the best fitness value dest_fit and 1-by-(M-1)matrix of 
+%     feature positions best_pos.
+%     
+%     Example:
 %
-%       Homepage: http://www.alimirjalili.com
-% _____________________________________________________
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Original Author: Dr. Seyedali Mirjalili
+% Revised by : Pramod H. Kachare (Sep 2023)
 
-% Max_iter: maximum iterations, N: populatoin size, Convergence_curve: Convergence curve
-% To run SMA: [Destination_fitness,bestPositions,Convergence_curve]=SMA(N,Max_iter,lb,ub,dim,fobj)
-function [Destination_fitness,bestPositions,Convergence_curve]=SMA(N,Max_iter,lb,ub,dim,fobj, data, target)
-disp('SMA is now tackling your problem')
+function [dest_fit,best_pos,conv_curve, CT]=SMA(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+if nargin < 1
+    error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
+end
+
+if nargin < 2  % If only data is given, assume last column as target
+    target = data(:, end);
+    data = data(:, 1:end-1);
+end
+
+if nargin < 3  % Default 10 search agents
+    No_P = 10;
+end
+
+if nargin < 4
+    fobj = str2func('split_fitness'); % Apply feature selection
+end
+
+if nargin < 5
+    N_Var = size(data, 2); % Apply feature selection on columns of X
+end
+
+if nargin < 6
+    Max_Iter = 100;     % Run optimization for max 100 iterations
+end
+
+if nargin < 8
+    UB = 1;     % Assume upper limit for each variable is 1
+end
+if nargin < 7
+    LB = 0;     % Assume lower limit for each variable is 0
+end
+
+if nargin < 9
+    verbose = 1; % Print progress after each iteration
+end
+%Start timer
+timer = tic();
 
 % initialize position
-bestPositions=zeros(1,dim);
-Destination_fitness=inf;%change this to -inf for maximization problems
-AllFitness = inf*ones(N,1);%record the fitness of all slime mold
-weight = ones(N,dim);%fitness weight of each slime mold
+best_pos=zeros(1,N_Var);
+dest_fit=inf;%change this to -inf for maximization problems
+AllFitness = inf*ones(No_P,1);%record the fitness of all slime mold
+weight = ones(No_P,N_Var);%fitness weight of each slime mold
+
+if length(UB)==1    % If same limit is applied on all variables
+    UB = repmat(UB, 1, N_Var);
+end
+if length(LB)==1    % If same limit is applied on all variables
+    LB = repmat(LB, 1, N_Var);
+end
+
 %Initialize the set of random solutions
-X=initialization(N,dim,ub,lb);
-Convergence_curve=zeros(1,Max_iter);
-it=1;  %Number of iterations
-lb=ones(1,dim).*lb; % lower boundary 
-ub=ones(1,dim).*ub; % upper boundary
+X = bsxfun(@plus, LB, bsxfun(@times, rand(No_P,N_Var), (UB-LB)));
+
+conv_curve=zeros(1,Max_Iter);
+
+tt=1;  %Number of iterations
+
 z=0.03; % parameter
 
 % Main loop
-while  it <= Max_iter
+while  tt <= Max_Iter
     
     %sort the fitness
-    for i=1:N
+    for ii=1:No_P
         % Check if solutions go outside the search space and bring them back
-        Flag4ub=X(i,:)>ub;
-        Flag4lb=X(i,:)<lb;
-        X(i,:)=(X(i,:).*(~(Flag4ub+Flag4lb)))+ub.*Flag4ub+lb.*Flag4lb;
-        AllFitness(i) = fobj(X(i,:), data, target);
+        Flag4ub=X(ii,:)>UB;
+        Flag4lb=X(ii,:)<LB;
+        X(ii,:)=(X(ii,:).*(~(Flag4ub+Flag4lb)))+UB.*Flag4ub+LB.*Flag4lb;
+        AllFitness(ii) = fobj(X(ii,:), data, target);
     end
     
     [SmellOrder,SmellIndex] = sort(AllFitness);  %Eq.(2.6)
-    worstFitness = SmellOrder(N);
+    worstFitness = SmellOrder(No_P);
     bestFitness = SmellOrder(1);
 
     S=bestFitness-worstFitness+eps;  % plus eps to avoid denominator zero
 
     %calculate the fitness weight of each slime mold
-    for i=1:N
-        for j=1:dim
-            if i<=(N/2)  %Eq.(2.5)
-                weight(SmellIndex(i),j) = 1+rand()*log10((bestFitness-SmellOrder(i))/(S)+1);
+    for ii=1:No_P
+        for jj=1:N_Var
+            if ii<=(No_P/2)  %Eq.(2.5)
+                weight(SmellIndex(ii),jj) = 1+rand()*log10((bestFitness-SmellOrder(ii))/(S)+1);
             else
-                weight(SmellIndex(i),j) = 1-rand()*log10((bestFitness-SmellOrder(i))/(S)+1);
+                weight(SmellIndex(ii),jj) = 1-rand()*log10((bestFitness-SmellOrder(ii))/(S)+1);
             end
         end
     end
     
     %update the best fitness value and best position
-    if bestFitness < Destination_fitness
-        bestPositions=X(SmellIndex(1),:);
-        Destination_fitness = bestFitness;
+    if bestFitness < dest_fit
+        best_pos=X(SmellIndex(1),:);
+        dest_fit = bestFitness;
     end
     
-    a = atanh(-(it/Max_iter)+1);   %Eq.(2.4)
-    b = 1-it/Max_iter;
+    a = atanh(-(tt/Max_Iter)+1);   %Eq.(2.4)
+    b = 1-tt/Max_Iter;
     % Update the Position of search agents
-    for i=1:N
+    for ii=1:No_P
         if rand<z     %Eq.(2.7)
-            X(i,:) = (ub-lb)*rand+lb;
+            X(ii,:) = (UB-LB)*rand+LB;
         else
-            p =tanh(abs(AllFitness(i)-Destination_fitness));  %Eq.(2.2)
-            vb = unifrnd(-a,a,1,dim);  %Eq.(2.3)
-            vc = unifrnd(-b,b,1,dim);
-            for j=1:dim
+            p =tanh(abs(AllFitness(ii)-dest_fit));  %Eq.(2.2)
+            vb = unifrnd(-a,a,1,N_Var);  %Eq.(2.3)
+            vc = unifrnd(-b,b,1,N_Var);
+            for jj=1:N_Var
                 r = rand();
-                A = randi([1,N]);  % two positions randomly selected from population
-                B = randi([1,N]);
+                A = randi([1,No_P]);  % two positions randomly selected from population
+                B = randi([1,No_P]);
                 if r<p    %Eq.(2.1)
-                    X(i,j) = bestPositions(j)+ vb(j)*(weight(i,j)*X(A,j)-X(B,j));
+                    X(ii,jj) = best_pos(jj)+ vb(jj)*(weight(ii,jj)*X(A,jj)-X(B,jj));
                 else
-                    X(i,j) = vc(j)*X(i,j);
+                    X(ii,jj) = vc(jj)*X(ii,jj);
                 end
             end
         end
     end
-    Convergence_curve(it)=Destination_fitness;
-    it=it+1;
-    
-        if mod(it,50)==0
-        display(['At iteration ', num2str(it), ' the fitness value is ', num2str(Destination_fitness)]);
+    conv_curve(tt)=dest_fit;
+    tt=tt+1;
+    if mod(tt, verbose) == 0  %Print best particle details at fixed iters
+        fprintf('SMA: Iteration %d    fitness: %4.3f \n', tt, dest_fit);
     end
 end
+CT = toc(timer);       % Total computation time in seconds
+fprintf('WOA: Final fitness: %4.3f \n', dest_fit);
 
-end
+%% END OF SMA.m
