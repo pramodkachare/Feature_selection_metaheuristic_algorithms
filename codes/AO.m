@@ -155,7 +155,7 @@ while tt<Max_Iter+1
     end
     %-------------------------------------------------------------------------------------
     if mod(tt, verbose) == 0  %Print best particle details at fixed iters
-        fprintf('DMOA: Iteration %d    fitness: %4.3f \n', tt, Best_F);
+        fprintf('AO: Iteration %d    fitness: %4.3f \n', tt, Best_F);
     end
     conv_curve(tt)=Best_F;
     tt=tt+1;
