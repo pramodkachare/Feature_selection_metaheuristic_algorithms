@@ -67,8 +67,15 @@ timer = tic();
 Best_uni=zeros(1,N_Var);
 Best_uni_Inf_rate=inf;
 
+if length(UB)==1    % If same limit is applied on all variables
+    UB = repmat(UB, 1, N_Var);
+end
+if length(LB)==1    % If same limit is applied on all variables
+    LB = repmat(LB, 1, N_Var);
+end
+
 %Initialize the positions of universes
-Universes=initialization(No_P,N_Var,UB,LB);
+Universes = bsxfun(@plus, LB, bsxfun(@times, rand(No_P,N_Var), (UB-LB)));
 
 %Minimum and maximum of Wormhole Existence Probability (min and max in
 % Eq.(3.3) in the paper
@@ -78,43 +85,44 @@ WEP_Min=0.2;
 conv_curve=zeros(1,Max_Iter);
 
 %Iteration(time) counter
-Time=1;
+tt=1;
 
 %Main loop
-while Time<Max_Iter+1
+while tt<Max_Iter+1
     
     %Eq. (3.3) in the paper
-    WEP=WEP_Min+Time*((WEP_Max-WEP_Min)/Max_Iter);
+    WEP=WEP_Min+tt*((WEP_Max-WEP_Min)/Max_Iter);
     
     %Travelling Distance Rate (Formula): Eq. (3.4) in the paper
-    TDR=1-((Time)^(1/6)/(Max_Iter)^(1/6));
+    TDR=1-((tt)^(1/6)/(Max_Iter)^(1/6));
     
     %Inflation rates (I) (fitness values)
     Inflation_rates=zeros(1,size(Universes,1));
     
-    for i=1:size(Universes,1)
+    for ii=1:size(Universes,1)
         
         %Boundary checking (to bring back the universes inside search
         % space if they go beyoud the boundaries
-        Flag4ub=Universes(i,:)>UB;
-        Flag4lb=Universes(i,:)<LB;
-        Universes(i,:)=(Universes(i,:).*(~(Flag4ub+Flag4lb)))+UB.*Flag4ub+LB.*Flag4lb;
+        Flag4ub=Universes(ii,:)>UB;
+        Flag4lb=Universes(ii,:)<LB;
+        Universes(ii,:)=(Universes(ii,:).*(~(Flag4ub+Flag4lb)))+UB.*Flag4ub+LB.*Flag4lb;
         
         %Calculate the inflation rate (fitness) of universes
-        Inflation_rates(1,i)=fobj(Universes(i,:), data, target);
+        Inflation_rates(1,ii)=fobj(Universes(ii,:), data, target);
         
         %Elitism
-        if Inflation_rates(1,i)<Best_uni_Inf_rate
-            Best_uni_Inf_rate=Inflation_rates(1,i);
-            Best_uni=Universes(i,:);
+        if Inflation_rates(1,ii)<Best_uni_Inf_rate
+            Best_uni_Inf_rate=Inflation_rates(1,ii);
+            Best_uni=Universes(ii,:);
         end
         
     end
     
     [sorted_Inflation_rates,sorted_indexes]=sort(Inflation_rates);
     
+    Sorted_universes = zeros(No_P, N_Var);
     for newindex=1:No_P
-        Sorted_universes(newindex,:)=Universes(sorted_indexes(newindex),:);
+        Sorted_universes(newindex, :)=Universes(sorted_indexes(newindex),:);
     end
     
     %Normaized inflation rates (NI in Eq. (3.1) in the paper)
@@ -123,11 +131,11 @@ while Time<Max_Iter+1
     Universes(1,:)= Sorted_universes(1,:);
     
     %Update the Position of universes
-    for i=2:size(Universes,1)%Starting from 2 since the firt one is the elite
-        Back_hole_index=i;
+    for ii=2:size(Universes,1)%Starting from 2 since the firt one is the elite
+        Back_hole_index=ii;
         for j=1:size(Universes,2)
             r1=rand();
-            if r1<normalized_sorted_Inflation_rates(i)
+            if r1<normalized_sorted_Inflation_rates(ii)
                 White_hole_index=RouletteWheelSelection(-sorted_Inflation_rates);% for maximization problem -sorted_Inflation_rates should be written as sorted_Inflation_rates
                 if White_hole_index==-1
                     White_hole_index=1;
@@ -142,10 +150,10 @@ while Time<Max_Iter+1
                 if r2<WEP
                     r3=rand();
                     if r3<0.5
-                        Universes(i,j)=Best_uni(1,j)+TDR*((UB-LB)*rand+LB);
+                        Universes(ii,j)=Best_uni(1,j)+TDR*((UB-LB)*rand+LB);
                     end
                     if r3>0.5
-                        Universes(i,j)=Best_uni(1,j)-TDR*((UB-LB)*rand+LB);
+                        Universes(ii,j)=Best_uni(1,j)-TDR*((UB-LB)*rand+LB);
                     end
                 end
             end
@@ -157,10 +165,10 @@ while Time<Max_Iter+1
                 if r2<WEP
                     r3=rand();
                     if r3<0.5
-                        Universes(i,j)=Best_uni(1,j)+TDR*((UB(j)-LB(j))*rand+LB(j));
+                        Universes(ii,j)=Best_uni(1,j)+TDR*((UB(j)-LB(j))*rand+LB(j));
                     end
                     if r3>0.5
-                        Universes(i,j)=Best_uni(1,j)-TDR*((UB(j)-LB(j))*rand+LB(j));
+                        Universes(ii,j)=Best_uni(1,j)-TDR*((UB(j)-LB(j))*rand+LB(j));
                     end
                 end
             end
@@ -169,13 +177,13 @@ while Time<Max_Iter+1
     end
     
     %Update the convergence curve
-    conv_curve(Time)=Best_uni_Inf_rate;
+    conv_curve(tt)=Best_uni_Inf_rate;
     
     %Print the best universe details after every 50 iterations
     if mod(tt, verbose) == 0  %Print best particle details at fixed iters
-        fprintf('MVO: Iteration %d    fitness: %4.3f \n', Time, Best_uni_Inf_rate);
+        fprintf('MVO: Iteration %d    fitness: %4.3f \n', tt, Best_uni_Inf_rate);
     end
-    Time=Time+1;
+    tt=tt+1;
 end
 CT = toc(timer);       % Total computation time in seconds
 fprintf('MVO: Final fitness: %4.3f \n', Best_uni_Inf_rate);
@@ -207,24 +215,4 @@ function choice = RouletteWheelSelection(weights)
   end
   choice = chosen_index;
 
-% This function creates the first random population
-
-function X=initialization(SearchAgents_no,dim,ub,lb)
-
-Boundary_no= size(ub,2); % numnber of boundaries
-
-% If the boundaries of all variables are equal and user enter a signle
-% number for both ub and lb
-if Boundary_no==1
-    X=rand(SearchAgents_no,dim).*(ub-lb)+lb;
-end
-
-% If each variable has a different lb and ub
-if Boundary_no>1
-    for i=1:dim
-        ub_i=ub(i);
-        lb_i=lb(i);
-        X(:,i)=rand(SearchAgents_no,1).*(ub_i-lb_i)+lb_i;
-    end
-end
-
+  %% END OF MVO.m
