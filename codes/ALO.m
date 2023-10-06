@@ -1,39 +1,29 @@
-%___________________________________________________________________%
-%  Ant Lion Optimizer (ALO) source codes demo version 1.0           %
-%                                                                   %
-%  Developed in MATLAB R2011b(7.13)                                 %
-%                                                                   %
-%  Author and programmer: Seyedali Mirjalili                        %
-%                                                                   %
-%         e-Mail: ali.mirjalili@gmail.com                           %
-%                 seyedali.mirjalili@griffithuni.edu.au             %
-%                                                                   %
-%       Homepage: http://www.alimirjalili.com                       %
-%                                                                   %
-%   Main paper:                                                     %
-%                                                                   %
-%   S. Mirjalili, The Ant Lion Optimizer                            %
-%   Advances in Engineering Software , in press,2015                %
-%   DOI: http://dx.doi.org/10.1016/j.advengsoft.2015.01.010         %
-%                                                                   %
-%___________________________________________________________________%
+%ALO Ant Lion Optimizer
+% [Elt_AL_F, Elt_AL_P, conv_curve, CT] = ALO(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+% 
+%   Main paper: S. Mirjalili. 
+%               The Ant Lion Optimizer. 
+%               Advances in Engineering Software , 83, 80-98, 2015
+%               DOI: 10.1016/j.advengsoft.2015.01.010 
+% 
+%     [Elt_AL_F, Elt_AL_P] = ALO(X) applies feature selection on M-by-N matrix X
+%     with N examples and assuming last column as the classification target 
+%     and returns the best fitness value Elt_AL_F and 1-by-(M-1) matrix of 
+%     feature positions Elt_AL_P.
+%
+%     [Elt_AL_F, Elt_AL_P] = ALO(X, y) applies feature selection on M-by-N feature 
+%     matrix X and 1-by-N target matrix y and returns the best fitness value
+%     Elt_AL_F and 1-by-(M-1) matrix of feature positions Elt_AL_P.
+%     
+%     Example:
+%
+%
+% Original Author: Dr. Seyedali Mirjalili                    
+% Revised by : Pramod H. Kachare (Oct 2023)
 
-% You can simply define your cost in a seperate file and load its handle to fobj 
-% The initial parameters that you need are:
-%__________________________________________
-% fobj = @YourCostFunction
-% dim = number of your variables
-% Max_iteration = maximum number of generations
-% SearchAgents_no = number of search agents
-% lb=[lb1,lb2,...,lbn] where lbn is the lower bound of variable n
-% ub=[ub1,ub2,...,ubn] where ubn is the upper bound of variable n
-% If all the variables have equal lower bound you can just
-% define lb and ub as two single number numbers
 
-% To run ALO: [Best_score,Best_pos,cg_curve]=ALO(SearchAgents_no,Max_iteration,lb,ub,dim,fobj)
-
-function [Elite_antlion_fitness,Elite_antlion_position,Convergence_curve]=ALO(N,Max_iter,lb,ub,dim,fobj)
-
+function [Elt_AL_F,Elt_AL_P,conv_curve,CT]=ALO(N,Max_iter,lb,ub,dim,fobj)
+data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose
 % Initialize the positions of antlions and ants
 antlion_position=initialization(N,dim,ub,lb);
 ant_position=initialization(N,dim,ub,lb);
@@ -41,9 +31,9 @@ ant_position=initialization(N,dim,ub,lb);
 % Initialize variables to save the position of elite, sorted antlions, 
 % convergence curve, antlions fitness, and ants fitness
 Sorted_antlions=zeros(N,dim);
-Elite_antlion_position=zeros(1,dim);
-Elite_antlion_fitness=inf;
-Convergence_curve=zeros(1,Max_iter);
+Elt_AL_P=zeros(1,dim);
+Elt_AL_F=inf;
+conv_curve=zeros(1,Max_iter);
 antlions_fitness=zeros(1,N);
 ants_fitness=zeros(1,N);
 
@@ -58,8 +48,8 @@ for newindex=1:N
      Sorted_antlions(newindex,:)=antlion_position(sorted_indexes(newindex),:);
 end
     
-Elite_antlion_position=Sorted_antlions(1,:);
-Elite_antlion_fitness=sorted_antlion_fitness(1);
+Elt_AL_P=Sorted_antlions(1,:);
+Elt_AL_F=sorted_antlion_fitness(1);
 
 % Main loop start from the second iteration since the first iteration 
 % was dedicated to calculating the fitness of antlions
@@ -78,7 +68,7 @@ while Current_iter<Max_iter+1
         RA=Random_walk_around_antlion(dim,Max_iter,lb,ub, Sorted_antlions(Rolette_index,:),Current_iter);
         
         % RA is the random walk around the elite (best antlion so far)
-        [RE]=Random_walk_around_antlion(dim,Max_iter,lb,ub, Elite_antlion_position(1,:),Current_iter);
+        [RE]=Random_walk_around_antlion(dim,Max_iter,lb,ub, Elt_AL_P(1,:),Current_iter);
         
         ant_position(i,:)= (RA(Current_iter,:)+RE(Current_iter,:))/2; % Equation (2.13) in the paper          
     end
@@ -108,21 +98,21 @@ while Current_iter<Max_iter+1
     Sorted_antlions=double_sorted_population(1:N,:);
         
     % Update the position of elite if any antlinons becomes fitter than it
-    if antlions_fitness(1)<Elite_antlion_fitness 
-        Elite_antlion_position=Sorted_antlions(1,:);
-        Elite_antlion_fitness=antlions_fitness(1);
+    if antlions_fitness(1)<Elt_AL_F 
+        Elt_AL_P=Sorted_antlions(1,:);
+        Elt_AL_F=antlions_fitness(1);
     end
       
     % Keep the elite in the population
-    Sorted_antlions(1,:)=Elite_antlion_position;
-    antlions_fitness(1)=Elite_antlion_fitness;
+    Sorted_antlions(1,:)=Elt_AL_P;
+    antlions_fitness(1)=Elt_AL_F;
   
     % Update the convergence curve
-    Convergence_curve(Current_iter)=Elite_antlion_fitness;
+    conv_curve(Current_iter)=Elt_AL_F;
 
     % Display the iteration and best optimum obtained so far
     if mod(Current_iter,50)==0
-        display(['At iteration ', num2str(Current_iter), ' the elite fitness is ', num2str(Elite_antlion_fitness)]);
+        display(['At iteration ', num2str(Current_iter), ' the elite fitness is ', num2str(Elt_AL_F)]);
     end
 
     Current_iter=Current_iter+1; 
