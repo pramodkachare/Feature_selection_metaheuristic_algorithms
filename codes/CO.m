@@ -15,7 +15,7 @@
 %
 %     [Best_F, Best_P] = CO(X, y) applies feature selection on M-by-N feature 
 %     matrix X and 1-by-N target matrix y and returns the best fitness value
-%     GBEST and 1-by-(M-1) matrix of feature positions Best_P.
+%     Best_F and 1-by-(M-1) matrix of feature positions Best_P.
 %     
 %     Example:
 %
