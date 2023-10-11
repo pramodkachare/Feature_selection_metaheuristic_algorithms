@@ -10,6 +10,7 @@
 %     algos = 1-by-N cell array of NIA names. Available NIAs are:
 %     PSO : Particle Swarm Optimization (1995)
 %     GWO : Grey Wolf Optimization (2014)
+%     ALO : Ant Lion Optimizer (2015)
 %     MVO: Multi-Verse Optimizer (2016, February)
 %     WOA: Whale Optimization Algorithm (2016, May)
 %     SSA : Salp Swarm Algorithm (2017)
