@@ -22,29 +22,65 @@
 % Revised by : Pramod H. Kachare (Oct 2023)
 
 
-function [Elt_AL_F,Elt_AL_P,conv_curve,CT]=ALO(N,Max_iter,lb,ub,dim,fobj)
-data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose
+function [Elt_AL_F,Elt_AL_P,conv_curve,CT]=ALO(data, target, No_P, fobj, N_Var, Max_Iter, LB, UB, verbose)
+if nargin < 1
+    error('MATLAB:notEnoughInputs', 'Please provide data for feature selection.');
+end
+
+if nargin < 2  % If only data is given, assume last column as target
+    target = data(:, end);
+    data = data(:, 1:end-1);
+end
+
+if nargin < 3  % Default 10 search agents
+    No_P = 10;
+end
+
+if nargin < 4
+    fobj = str2func('split_fitness'); % Apply feature selection
+end
+
+if nargin < 5
+    N_Var = size(data, 2); % Apply feature selection on columns of X
+end
+
+if nargin < 6
+    Max_Iter = 100;     % Run optimization for max 100 iterations
+end
+
+if nargin < 8
+    UB = 1;     % Assume upper limit for each variable is 1
+end
+if nargin < 7
+    LB = 0;     % Assume lower limit for each variable is 0
+end
+
+if nargin < 9
+    verbose = 1; % Print progress after each iteration
+end
+%Start timer
+timer = tic();
+
 % Initialize the positions of antlions and ants
-antlion_position=initialization(N,dim,ub,lb);
-ant_position=initialization(N,dim,ub,lb);
+antlion_position=initialization(No_P,N_Var,UB,LB);
+ant_position=initialization(No_P,N_Var,UB,LB);
 
 % Initialize variables to save the position of elite, sorted antlions, 
 % convergence curve, antlions fitness, and ants fitness
-Sorted_antlions=zeros(N,dim);
-Elt_AL_P=zeros(1,dim);
-Elt_AL_F=inf;
-conv_curve=zeros(1,Max_iter);
-antlions_fitness=zeros(1,N);
-ants_fitness=zeros(1,N);
+Sorted_antlions=zeros(No_P,N_Var);
+
+conv_curve=zeros(1,Max_Iter);
+AL_fit=zeros(1,No_P);
+Ants_fit=zeros(1,No_P);
 
 % Calculate the fitness of initial antlions and sort them
 for i=1:size(antlion_position,1)
-    antlions_fitness(1,i)=fobj(antlion_position(i,:)); 
+    AL_fit(1,i)=fobj(antlion_position(i,:)); 
 end
 
-[sorted_antlion_fitness,sorted_indexes]=sort(antlions_fitness);
+[sorted_antlion_fitness,sorted_indexes]=sort(AL_fit);
     
-for newindex=1:N
+for newindex=1:No_P
      Sorted_antlions(newindex,:)=antlion_position(sorted_indexes(newindex),:);
 end
     
@@ -53,8 +89,8 @@ Elt_AL_F=sorted_antlion_fitness(1);
 
 % Main loop start from the second iteration since the first iteration 
 % was dedicated to calculating the fitness of antlions
-Current_iter=2; 
-while Current_iter<Max_iter+1
+tt=2; 
+while tt<Max_Iter+1
     
     % This for loop simulate random walks
     for i=1:size(ant_position,1)
@@ -65,23 +101,23 @@ while Current_iter<Max_iter+1
         end
       
         % RA is the random walk around the selected antlion by rolette wheel
-        RA=Random_walk_around_antlion(dim,Max_iter,lb,ub, Sorted_antlions(Rolette_index,:),Current_iter);
+        RA=Random_walk_around_antlion(N_Var,Max_Iter,LB,UB, Sorted_antlions(Rolette_index,:),tt);
         
         % RA is the random walk around the elite (best antlion so far)
-        [RE]=Random_walk_around_antlion(dim,Max_iter,lb,ub, Elt_AL_P(1,:),Current_iter);
+        [RE]=Random_walk_around_antlion(N_Var,Max_Iter,LB,UB, Elt_AL_P(1,:),tt);
         
-        ant_position(i,:)= (RA(Current_iter,:)+RE(Current_iter,:))/2; % Equation (2.13) in the paper          
+        ant_position(i,:)= (RA(tt,:)+RE(tt,:))/2; % Equation (2.13) in the paper          
     end
     
     for i=1:size(ant_position,1)  
         
         % Boundar checking (bring back the antlions of ants inside search
         % space if they go beyoud the boundaries
-        Flag4ub=ant_position(i,:)>ub;
-        Flag4lb=ant_position(i,:)<lb;
-        ant_position(i,:)=(ant_position(i,:).*(~(Flag4ub+Flag4lb)))+ub.*Flag4ub+lb.*Flag4lb;  
+        Flag4ub=ant_position(i,:)>UB;
+        Flag4lb=ant_position(i,:)<LB;
+        ant_position(i,:)=(ant_position(i,:).*(~(Flag4ub+Flag4lb)))+UB.*Flag4ub+LB.*Flag4lb;  
         
-        ants_fitness(1,i)=fobj(ant_position(i,:));        
+        Ants_fit(1,i)=fobj(ant_position(i,:));        
        
     end
     
@@ -89,37 +125,34 @@ while Current_iter<Max_iter+1
     % becomes fitter than an antlion we assume it was cought by the antlion  
     % and the antlion update goes to its position to build the trap)
     double_population=[Sorted_antlions;ant_position];
-    double_fitness=[sorted_antlion_fitness ants_fitness];
+    double_fitness=[sorted_antlion_fitness Ants_fit];
         
     [double_fitness_sorted I]=sort(double_fitness);
     double_sorted_population=double_population(I,:);
         
-    antlions_fitness=double_fitness_sorted(1:N);
-    Sorted_antlions=double_sorted_population(1:N,:);
+    AL_fit=double_fitness_sorted(1:No_P);
+    Sorted_antlions=double_sorted_population(1:No_P,:);
         
     % Update the position of elite if any antlinons becomes fitter than it
-    if antlions_fitness(1)<Elt_AL_F 
+    if AL_fit(1)<Elt_AL_F 
         Elt_AL_P=Sorted_antlions(1,:);
-        Elt_AL_F=antlions_fitness(1);
+        Elt_AL_F=AL_fit(1);
     end
       
     % Keep the elite in the population
     Sorted_antlions(1,:)=Elt_AL_P;
-    antlions_fitness(1)=Elt_AL_F;
+    AL_fit(1)=Elt_AL_F;
   
     % Update the convergence curve
-    conv_curve(Current_iter)=Elt_AL_F;
+    conv_curve(tt)=Elt_AL_F;
 
-    % Display the iteration and best optimum obtained so far
-    if mod(Current_iter,50)==0
-        display(['At iteration ', num2str(Current_iter), ' the elite fitness is ', num2str(Elt_AL_F)]);
+    if mod(tt, verbose) == 0  %Print best fitness details at fixed iters
+        fprintf('ALO: Iteration %d    fitness: %4.3f \n', tt, Elt_AL_F);
     end
 
-    Current_iter=Current_iter+1; 
+    tt=tt+1; 
 end
+CT = toc(timer);       % Total computation time in seconds
+fprintf('ALO: Final fitness: %4.3f \n', Elt_AL_F);
 
-
-
-
-
-
+%% END OF ALO.m
