@@ -6,12 +6,12 @@
 %               Knowledge-Based Systems , 89, 228-249, 2015
 %               DOI: 10.1016/j.knosys.2015.07.006 
 % 
-%     [Best_F,Best_P] = ALO(X) applies feature selection on M-by-N matrix X
+%     [Best_F,Best_P] = MFO(X) applies feature selection on M-by-N matrix X
 %     with N examples and assuming last column as the classification target 
 %     and returns the best fitness value Best_F and 1-by-(M-1) matrix of 
 %     feature positions Best_P.
 %
-%     [Best_F,Best_P] = ALO(X, y) applies feature selection on M-by-N feature 
+%     [Best_F,Best_P] = MFO(X, y) applies feature selection on M-by-N feature 
 %     matrix X and 1-by-N target matrix y and returns the best fitness value
 %     Best_F and 1-by-(M-1) matrix of feature positions Best_P.
 %     
