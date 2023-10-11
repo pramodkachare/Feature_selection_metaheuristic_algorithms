@@ -82,16 +82,14 @@ while tt<Max_Iter+1
     % Number of flames Eq. (3.14) in the paper
     Flame_no=round(No_P-tt*((No_P-1)/Max_Iter));
     
-    for i=1:size(Moth_pos,1)
-        
+    for i=1:size(Moth_pos,1)        
         % Check if moths go out of the search spaceand bring it back
         Flag4ub=Moth_pos(i,:)>UB;
         Flag4lb=Moth_pos(i,:)<LB;
         Moth_pos(i,:)=(Moth_pos(i,:).*(~(Flag4ub+Flag4lb)))+UB.*Flag4ub+LB.*Flag4lb;  
         
         % Calculate the fitness of moths
-        Moth_fit(1,i)=fobj(Moth_pos(i,:));  
-        
+        Moth_fit(1,i)=fobj(Moth_pos(i,:));          
     end
        
     if tt==1
@@ -102,8 +100,7 @@ while tt<Max_Iter+1
         % Update the flames
         best_flames=sorted_population;
         best_flame_fitness=fitness_sorted;
-    else
-        
+    else        
         % Sort the moths
         double_population=[previous_population;best_flames];
         double_fitness=[previous_fitness best_flame_fitness];
@@ -129,33 +126,30 @@ while tt<Max_Iter+1
     % a linearly dicreases from -1 to -2 to calculate t in Eq. (3.12)
     a=-1+tt*((-1)/Max_Iter);
     
-    for i=1:size(Moth_pos,1)
-        
+    for i=1:size(Moth_pos,1)        
         for j=1:size(Moth_pos,2)
             if i<=Flame_no % Update the position of the moth with respect to its corresponsing flame
                 
                 % D in Eq. (3.13)
-                distance_to_flame=abs(sorted_population(i,j)-Moth_pos(i,j));
+                dist_to_flame=abs(sorted_population(i,j)-Moth_pos(i,j));
                 b=1;
                 t=(a-1)*rand+1;
                 
                 % Eq. (3.12)
-                Moth_pos(i,j)=distance_to_flame*exp(b.*t).*cos(t.*2*pi)+sorted_population(i,j);
+                Moth_pos(i,j)=dist_to_flame*exp(b.*t).*cos(t.*2*pi)+sorted_population(i,j);
             end
             
             if i>Flame_no % Upaate the position of the moth with respct to one flame
                 
                 % Eq. (3.13)
-                distance_to_flame=abs(sorted_population(i,j)-Moth_pos(i,j));
+                dist_to_flame=abs(sorted_population(i,j)-Moth_pos(i,j));
                 b=1;
                 t=(a-1)*rand+1;
                 
                 % Eq. (3.12)
-                Moth_pos(i,j)=distance_to_flame*exp(b.*t).*cos(t.*2*pi)+sorted_population(Flame_no,j);
-            end
-            
-        end
-        
+                Moth_pos(i,j)=dist_to_flame*exp(b.*t).*cos(t.*2*pi)+sorted_population(Flame_no,j);
+            end            
+        end        
     end
     
     conv_curve(tt)=Best_F;
@@ -169,4 +163,4 @@ end
 CT = toc(timer);       % Total computation time in seconds
 fprintf('MFO: Final fitness: %4.3f \n', Best_F);
 
-%% END OF WOA.m
+%% END OF MFO.m
