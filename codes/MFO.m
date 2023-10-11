@@ -71,6 +71,7 @@ end
 
 %Initialize the positions of moths
 Moth_pos = bsxfun(@plus, LB, bsxfun(@times, rand(No_P,N_Var), (UB-LB)));
+Moth_fit = zeros(1, No_P);
 
 conv_curve=zeros(1,Max_Iter);
 
@@ -82,14 +83,14 @@ while tt<Max_Iter+1
     % Number of flames Eq. (3.14) in the paper
     Flame_no=round(No_P-tt*((No_P-1)/Max_Iter));
     
-    for i=1:size(Moth_pos,1)        
+    for i=1:No_P  
         % Check if moths go out of the search spaceand bring it back
         Flag4ub=Moth_pos(i,:)>UB;
         Flag4lb=Moth_pos(i,:)<LB;
         Moth_pos(i,:)=(Moth_pos(i,:).*(~(Flag4ub+Flag4lb)))+UB.*Flag4ub+LB.*Flag4lb;  
         
         % Calculate the fitness of moths
-        Moth_fit(1,i)=fobj(Moth_pos(i,:));          
+        Moth_fit(1,i)=fobj(Moth_pos(i,:) > (LB+UB)/2, data, target);          
     end
        
     if tt==1
@@ -126,8 +127,8 @@ while tt<Max_Iter+1
     % a linearly dicreases from -1 to -2 to calculate t in Eq. (3.12)
     a=-1+tt*((-1)/Max_Iter);
     
-    for i=1:size(Moth_pos,1)        
-        for j=1:size(Moth_pos,2)
+    for i=1:No_P    
+        for j=1:N_Var
             if i<=Flame_no % Update the position of the moth with respect to its corresponsing flame
                 
                 % D in Eq. (3.13)
