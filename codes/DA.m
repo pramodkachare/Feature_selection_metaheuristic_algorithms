@@ -82,14 +82,13 @@ Fitness=zeros(1,No_P);
 %The initial radius of gragonflies' neighbourhoods
 Delta_max=(UB-LB)/10;
 
-Food_fitness=inf;
-Food_pos=zeros(N_Var,1);
+Food_fit = inf;
+Food_pos = zeros(N_Var,1);
 
-Enemy_fitness=-inf;
-Enemy_pos=zeros(N_Var,1);
+Enemy_fit = -inf;
+Enemy_pos = zeros(N_Var,1);
 
 for tt=1:Max_Iter
-    
     r=(UB-LB)/4+((UB-LB)*(tt/Max_Iter)*2);
     
     w=0.9-tt*((0.9-0.4)/Max_Iter);
@@ -105,22 +104,22 @@ for tt=1:Max_Iter
     f=2*rand;      % Food attraction weight
     e=my_c;        % Enemy distraction weight
     
-    for i=1:No_P %Calculate all the objective values first
-        Fitness(1,i)=fobj(X(:,i)');
-        if Fitness(1,i)<Food_fitness
-            Food_fitness=Fitness(1,i);
-            Food_pos=X(:,i);
+    for ii=1:No_P %Calculate all the objective values first
+        Fitness(1,ii)=fobj(X(:,ii)' > (LB+UB)/2, data, target);
+        if Fitness(1,ii)<Food_fit
+            Food_fit=Fitness(1,ii);
+            Food_pos=X(:,ii);
         end
         
-        if Fitness(1,i)>Enemy_fitness
-            if all(X(:,i)<UB') && all( X(:,i)>LB')
-                Enemy_fitness=Fitness(1,i);
-                Enemy_pos=X(:,i);
+        if Fitness(1,ii)>Enemy_fit
+            if all(X(:,ii)<UB') && all( X(:,ii)>LB')
+                Enemy_fit=Fitness(1,ii);
+                Enemy_pos=X(:,ii);
             end
         end
     end
     
-    for i=1:No_P
+    for ii=1:No_P
         index=0;
         neighbours_no=0;
         
@@ -128,7 +127,7 @@ for tt=1:Max_Iter
         clear Neighbours_X
         %find the neighbouring solutions
         for j=1:No_P
-            Dist2Enemy=distance(X(:,i),X(:,j));
+            Dist2Enemy=distance(X(:,ii),X(:,j));
             if (all(Dist2Enemy<=r) && all(Dist2Enemy~=0))
                 index=index+1;
                 neighbours_no=neighbours_no+1;
@@ -142,7 +141,7 @@ for tt=1:Max_Iter
         S=zeros(N_Var,1);
         if neighbours_no>1
             for k=1:neighbours_no
-                S=S+(Neighbours_X(:,k)-X(:,i));
+                S=S+(Neighbours_X(:,k)-X(:,ii));
             end
             S=-S;
         else
@@ -154,7 +153,7 @@ for tt=1:Max_Iter
         if neighbours_no>1
             A=(sum(Neighbours_DeltaX')')/neighbours_no;
         else
-            A=DeltaX(:,i);
+            A=DeltaX(:,ii);
         end
         
         % Cohesion%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -162,78 +161,78 @@ for tt=1:Max_Iter
         if neighbours_no>1
             C_temp=(sum(Neighbours_X')')/neighbours_no;
         else
-            C_temp=X(:,i);
+            C_temp=X(:,ii);
         end
         
-        C=C_temp-X(:,i);
+        C=C_temp-X(:,ii);
         
         % Attraction to food%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Eq. (3.4)
-        Dist2Food=distance(X(:,i),Food_pos(:,1));
+        Dist2Food=distance(X(:,ii),Food_pos(:,1));
         if all(Dist2Food<=r)
-            F=Food_pos-X(:,i);
+            F=Food_pos-X(:,ii);
         else
             F=0;
         end
         
         % Distraction from enemy%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Eq. (3.5)
-        Dist2Enemy=distance(X(:,i),Enemy_pos(:,1));
+        Dist2Enemy=distance(X(:,ii),Enemy_pos(:,1));
         if all(Dist2Enemy<=r)
-            Enemy=Enemy_pos+X(:,i);
+            Enemy=Enemy_pos+X(:,ii);
         else
             Enemy=zeros(N_Var,1);
         end
         
-        for tt=1:N_Var
-            if X(tt,i)>UB(tt)
-                X(tt,i)=LB(tt);
-                DeltaX(tt,i)=rand;
+        for jj=1:N_Var
+            if X(jj,ii)>UB(jj)
+                X(jj,ii)=LB(jj);
+                DeltaX(jj,ii)=rand;
             end
-            if X(tt,i)<LB(tt)
-                X(tt,i)=UB(tt);
-                DeltaX(tt,i)=rand;
+            if X(jj,ii)<LB(jj)
+                X(jj,ii)=UB(jj);
+                DeltaX(jj,ii)=rand;
             end
         end
         
         if any(Dist2Food>r)
             if neighbours_no>1
                 for j=1:N_Var
-                    DeltaX(j,i)=w*DeltaX(j,i)+rand*A(j,1)+rand*C(j,1)+rand*S(j,1);
-                    if DeltaX(j,i)>Delta_max(j)
-                        DeltaX(j,i)=Delta_max(j);
+                    DeltaX(j,ii)=w*DeltaX(j,ii)+rand*A(j,1)+rand*C(j,1)+rand*S(j,1);
+                    if DeltaX(j,ii)>Delta_max(j)
+                        DeltaX(j,ii)=Delta_max(j);
                     end
-                    if DeltaX(j,i)<-Delta_max(j)
-                        DeltaX(j,i)=-Delta_max(j);
+                    if DeltaX(j,ii)<-Delta_max(j)
+                        DeltaX(j,ii)=-Delta_max(j);
                     end
-                    X(j,i)=X(j,i)+DeltaX(j,i);
+                    X(j,ii)=X(j,ii)+DeltaX(j,ii);
                 end
             else
                 % Eq. (3.8)
-                X(:,i)=X(:,i)+Levy(N_Var)'.*X(:,i);
-                DeltaX(:,i)=0;
+                X(:,ii)=X(:,ii)+Levy(N_Var)'.*X(:,ii);
+                DeltaX(:,ii)=0;
             end
         else
             for j=1:N_Var
                 % Eq. (3.6)
-                DeltaX(j,i)=(a*A(j,1)+c*C(j,1)+s*S(j,1)+f*F(j,1)+e*Enemy(j,1)) + w*DeltaX(j,i);
-                if DeltaX(j,i)>Delta_max(j)
-                    DeltaX(j,i)=Delta_max(j);
+                DeltaX(j,ii)=(a*A(j,1)+c*C(j,1)+s*S(j,1)+f*F(j,1)+e*Enemy(j,1)) + w*DeltaX(j,ii);
+                if DeltaX(j,ii)>Delta_max(j)
+                    DeltaX(j,ii)=Delta_max(j);
                 end
-                if DeltaX(j,i)<-Delta_max(j)
-                    DeltaX(j,i)=-Delta_max(j);
+                if DeltaX(j,ii)<-Delta_max(j)
+                    DeltaX(j,ii)=-Delta_max(j);
                 end
-                X(j,i)=X(j,i)+DeltaX(j,i);
+                X(j,ii)=X(j,ii)+DeltaX(j,ii);
             end 
         end
         
-        Flag4ub=X(:,i)>UB';
-        Flag4lb=X(:,i)<LB';
-        X(:,i)=(X(:,i).*(~(Flag4ub+Flag4lb)))+UB'.*Flag4ub+LB'.*Flag4lb;
+        Flag4ub=X(:,ii)>UB';
+        Flag4lb=X(:,ii)<LB';
+        X(:,ii)=(X(:,ii).*(~(Flag4ub+Flag4lb)))+UB'.*Flag4ub+LB'.*Flag4lb;
         
     end
-    Best_F=Food_fitness;
-    Best_P=Food_pos;
+    Best_F = Food_fit;
+    Best_P = Food_pos;
     
     conv_curve(tt)=Best_F;
     % Display the iteration and best optimum obtained so far
@@ -245,4 +244,3 @@ CT = toc(timer);       % Total computation time in seconds
 fprintf('DA: Final fitness: %4.3f \n', Best_F);
 
 %% END OF DA.m
-
