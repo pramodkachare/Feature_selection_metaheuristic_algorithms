@@ -61,9 +61,17 @@ end
 %Start timer
 timer = tic();
 
+
+if length(UB)==1    % If same limit is applied on all variables
+    UB = repmat(UB, 1, N_Var);
+end
+if length(LB)==1    % If same limit is applied on all variables
+    LB = repmat(LB, 1, N_Var);
+end
+
 % Initialize the positions of antlions and ants
-AL_pos=initialization(No_P,N_Var,UB,LB);
-Ant_pos=initialization(No_P,N_Var,UB,LB);
+AL_pos  = bsxfun(@plus, LB, bsxfun(@times, rand(No_P,N_Var), (UB-LB)));
+Ant_pos = bsxfun(@plus, LB, bsxfun(@times, rand(No_P,N_Var), (UB-LB)));
 
 % Initialize variables to save the position of elite, sorted antlions, 
 % convergence curve, antlions fitness, and ants fitness
@@ -78,14 +86,14 @@ for i=1:size(AL_pos,1)
     AL_fit(1,i)=fobj(AL_pos(i,:) > (LB+UB)/2, data, target); 
 end
 
-[sorted_antlion_fitness,sorted_indexes]=sort(AL_fit);
+[sorted_AL_fit,sorted_ind]=sort(AL_fit);
     
 for newindex=1:No_P
-     Sorted_AL(newindex,:)=AL_pos(sorted_indexes(newindex),:);
+     Sorted_AL(newindex,:)=AL_pos(sorted_ind(newindex),:);
 end
     
 Elt_AL_P=Sorted_AL(1,:);
-Elt_AL_F=sorted_antlion_fitness(1);
+Elt_AL_F=sorted_AL_fit(1);
 
 % Main loop start from the second iteration since the first iteration 
 % was dedicated to calculating the fitness of antlions
@@ -95,7 +103,7 @@ while tt<Max_Iter+1
     % This for loop simulate random walks
     for i=1:size(Ant_pos,1)
         % Select ant lions based on their fitness (the better anlion the higher chance of catching ant)
-        Rolette_index=RouletteWheelSelection(1./sorted_antlion_fitness);
+        Rolette_index=RouletteWheelSelection(1./sorted_AL_fit);
         if Rolette_index==-1  
             Rolette_index=1;
         end
@@ -125,7 +133,7 @@ while tt<Max_Iter+1
     % becomes fitter than an antlion we assume it was cought by the antlion  
     % and the antlion update goes to its position to build the trap)
     double_population=[Sorted_AL;Ant_pos];
-    double_fitness=[sorted_antlion_fitness Ants_fit];
+    double_fitness=[sorted_AL_fit Ants_fit];
         
     [double_fitness_sorted, I]=sort(double_fitness);
     double_sorted_population=double_population(I,:);
