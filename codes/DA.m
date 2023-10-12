@@ -65,7 +65,6 @@ timer = tic();
 
 conv_curve=zeros(1,Max_Iter);
 
-
 if length(UB)==1    % If same limit is applied on all variables
     UB = repmat(UB, 1, N_Var);
 end
