@@ -95,9 +95,9 @@ cMin=0.00004;
 
 for ii=1:size(GH_pos,1)
     if flag == 1
-        GH_fit(1,ii)=fobj(GH_pos(ii,1:end-1));
+        GH_fit(1,ii)=fobj(GH_pos(ii,1:end-1) > (LB+UB)/2, data, target);
     else
-        GH_fit(1,ii)=fobj(GH_pos(ii,:));
+        GH_fit(1,ii)=fobj(GH_pos(ii,:) > (LB+UB)/2, data, target);
     end
     fit_history(ii,1)=GH_fit(1,ii);
     pos_history(ii,1,:)=GH_pos(ii,:);
@@ -122,6 +122,7 @@ while tt<Max_Iter+1
     
      
      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     GH_pos_temp = zeros(No_P, N_Var);
       for ii=1:size(GH_pos,1)
         temp= GH_pos';
        % for k=1:2:dim  
@@ -142,7 +143,7 @@ while tt<Max_Iter+1
       %  end
         
         X_new = c * S_i_total'+ (Best_P); % Eq. (2.7) in the paper      
-        GH_pos_temp(ii,:)=X_new'; 
+        GH_pos_temp(ii,:) = X_new'; 
       end
       
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -155,9 +156,9 @@ while tt<Max_Iter+1
         
         % Calculating the objective values for all grasshoppers
         if flag == 1
-            GH_fit(1,ii)=fobj(GH_pos(ii,1:end-1));
+            GH_fit(1,ii)=fobj(GH_pos(ii,1:end-1) > (LB+UB)/2, data, target);
         else
-            GH_fit(1,ii)=fobj(GH_pos(ii,:));
+            GH_fit(1,ii)=fobj(GH_pos(ii,:) > (LB+UB)/2, data, target);
         end
         fit_history(ii,tt)=GH_fit(1,ii);
         pos_history(ii,tt,:)=GH_pos(ii,:);
@@ -172,7 +173,7 @@ while tt<Max_Iter+1
     end
         
     conv_curve(tt)=Best_F;
-    % Display the iteration and best optimum obtained so far
+    % Display the iteration and best opti````````````````mum obtained so far
     if mod(tt, verbose) == 0  %Print best particle details at fixed iters
         fprintf('GOA: Iteration %d    fitness: %4.3f \n', tt, Best_F);
     end
