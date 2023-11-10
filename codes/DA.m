@@ -8,12 +8,12 @@
 %               Neural Computing and Applications, 27, 1053–1073, 2016
 %               DOI: 10.1007/s00521-015-1920-1 
 % 
-%     [Best_F,Best_P] = ALO(X) applies feature selection on M-by-N matrix X
+%     [Best_F,Best_P] = DA(X) applies feature selection on M-by-N matrix X
 %     with N examples and assuming last column as the classification target 
 %     and returns the best fitness value Best_F and 1-by-(M-1) matrix of 
 %     feature positions Best_P.
 %
-%     [Best_F,Best_P] = ALO(X, y) applies feature selection on M-by-N feature 
+%     [Best_F,Best_P] = DA(X, y) applies feature selection on M-by-N feature 
 %     matrix X and 1-by-N target matrix y and returns the best fitness value
 %     Best_F and 1-by-(M-1) matrix of feature positions Best_P.
 %     
